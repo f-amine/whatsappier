@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { SessionProvider } from "next-auth/react";
+import { ThemeProvider } from "next-themes";
+import { Toaster } from "@/components/ui/sonner";
+import ModalProvider from "@/components/modals/providers";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import QueryProviders from "@/components/providers/tanstackProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,11 +29,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} 
+        min-h-screen bg-background font-sans antialiased`}
       >
-        {children}
+        <QueryProviders>
+        <SessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+              <ModalProvider>{children}</ModalProvider>
+            <Toaster richColors closeButton />
+          </ThemeProvider>
+      </SessionProvider>
+      </QueryProviders>
       </body>
     </html>
   );
