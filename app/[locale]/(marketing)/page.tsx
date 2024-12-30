@@ -5,8 +5,8 @@ import ShimmerButton from "@/components/landing/shimmerButton";
 import { TypewriterEffectSmooth } from "@/components/landing/typeWriterEffectSmooth";
 import { XBlogArticle } from "@/components/landing/xBlogArticle";
 import { Icons } from "@/components/shared/icons";
+import { Link } from "@/i18n/routing";
 import type { Meteor } from "@/types";
-import Link from "next/link";
 
 const meteors_data: Meteor = {
   name: "Join our Discord",

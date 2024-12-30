@@ -1,7 +1,6 @@
 "use client";
 
 import { useContext } from "react";
-import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -15,6 +14,7 @@ import MaxWidthWrapper from "../shared/max-width-wrapper";
 import { useScroll } from "@/hooks/useScroll";
 import { docsConfig } from "@/config/docs";
 import { marketingConfig } from "@/config/marketing";
+import { Link } from "@/i18n/routing";
 
 interface NavBarProps {
   scroll?: boolean;
@@ -77,7 +77,6 @@ export function NavBar({ scroll = false }: NavBarProps) {
         </div>
 
         <div className="flex items-center space-x-3">
-          {/* right header for docs */}
           {session ? (
             <Link
               href={"/dashboard"}

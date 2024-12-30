@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -12,6 +11,7 @@ import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/shared/icons";
 import { ModeToggle } from "./mode-toggle";
+import { Link } from "@/i18n/routing";
 
 
 export function NavMobile() {
