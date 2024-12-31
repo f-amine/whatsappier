@@ -13,16 +13,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useToast } from '@/hooks/use-toast'
-import { createWhatsappInstance } from '@/lib/mutations/devices'
+import { checkConnectionStatus, createWhatsappInstance, WhatsappInstanceData } from '@/lib/mutations/devices'
+import { useMutation } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
 
-interface WhatsappInstanceData {
-  instanceName: string
-  number: string
-  qrcode: boolean
-  integration: 'WHATSAPP-BAILEYS' | 'WHATSAPP-BUSINESS'
-  token?: string
-  businessId?: string
-}
+
 
 interface WhatsappConnectionDialogProps {
   children: React.ReactNode
@@ -31,10 +26,9 @@ interface WhatsappConnectionDialogProps {
   onRefresh?: () => void
 }
 
-export function WhatsappConnectionDialog({
+export function CreateDeviceDialog({
   children,
   onConnectionCreated,
-  insideBuilder,
   onRefresh,
 }: WhatsappConnectionDialogProps) {
   const [open, setOpen] = useState(false)
@@ -51,6 +45,30 @@ export function WhatsappConnectionDialog({
     integration: 'WHATSAPP-BAILEYS'
   })
 
+
+  const createWhatsappMutation = useMutation({
+  mutationFn: (whatsappInstanceData: WhatsappInstanceData) =>
+    createWhatsappInstance(whatsappInstanceData),
+  onSuccess: (response) => {
+    setInstanceName(response.instance.instanceName);
+    if (response.qrcode) {
+      setQrData({
+        base64: response.qrcode.base64,
+        code: response.qrcode.code,
+        pairingCode: response.qrcode.pairingCode,
+      });
+    }
+    setCurrentStep(2);
+  },
+  onError: () => {
+    toast({
+      title: 'Error',
+      description: 'Failed to create WhatsApp instance',
+      variant: 'destructive',
+    });
+  },
+});
+
   const handleIntegrationTypeChange = (value: 'WHATSAPP-BAILEYS' | 'WHATSAPP-BUSINESS') => {
     setIntegrationType(value)
     setFormData(prev => ({
@@ -64,24 +82,7 @@ export function WhatsappConnectionDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      const response = await createWhatsappInstance(formData)
-      setInstanceName(response.instanceName)
-      if (response.qrcode) {
-        setQrData({
-          base64: response.qrcode.base64,
-          code: response.qrcode.code,
-          pairingCode: response.qrcode.pairingCode
-        })
-      }
-      setCurrentStep(2)
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to create WhatsApp instance',
-        variant: 'destructive',
-      })
-    }
+    createWhatsappMutation.mutate(formData)
   }
 
   const checkStatus = async () => {
@@ -122,7 +123,7 @@ export function WhatsappConnectionDialog({
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="WHATSAPP-BAILEYS" id="evolution" />
-                  <Label htmlFor="evolution">Evolution</Label>
+                  <Label htmlFor="evolution">Whatsappier</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="WHATSAPP-BUSINESS" id="business" />
@@ -201,8 +202,8 @@ export function WhatsappConnectionDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit">
-                Create Instance
+              <Button type="submit" disabled={createWhatsappMutation.isPending}>
+                {createWhatsappMutation.isPending ? <Loader2 className="animate-spin" /> : 'Create Instance'}
               </Button>
             </div>
           </form>

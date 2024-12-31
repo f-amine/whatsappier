@@ -10,9 +10,9 @@ import { DataTableFilter, RowDataWithActions } from '@/components/tables/data-ta
 import { deviceColumns } from '@/components/tables/devices/devices-table-collumns'
 import { getDevicesAction } from '@/actions/getDeviceAction'
 import { TableTitle } from '@/components/tables/table-title'
-import { Pick } from '@sinclair/typebox'
 import { PermissionNeededTooltip } from '@/components/ui/permission-needed-tooltip'
 import { Button } from '@/components/ui/button'
+import { CreateDeviceDialog } from '@/components/pages/devices/addDeviceDialog'
 
 const statusOptions = [
   { label: 'Connected', value: 'CONNECTED', icon: SignalIcon },
@@ -92,7 +92,7 @@ export default function DevicesPage() {
                 className="flex gap-2 items-center"
               >
                 <ChevronDown className="w-4 h-4" />
-                {'Import Flow'}
+                {'Create Device'}
               </Button>
             </CreateDeviceDialog>
             </PermissionNeededTooltip>

@@ -1,0 +1,51 @@
+version: '3.0'
+services:
+  api:
+    container_name: evolution_api
+    image: atendai/evolution-api:latest
+    restart: always
+    ports:
+      - 8081:8081
+    volumes:
+      - evolution_instances:/evolution/instances
+    networks:
+      - activepieces
+    env_file:
+      - .env
+    expose:
+      - 8081
+  postgres:
+    image: 'postgres:16'
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      - 'POSTGRES_DB=${AP_POSTGRES_DATABASE}'
+      - 'POSTGRES_PASSWORD=${AP_POSTGRES_PASSWORD}'
+      - 'POSTGRES_USER=${AP_POSTGRES_USERNAME}'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    expose:
+      - 5432
+    networks:
+      - activepieces
+  redis:
+    image: 'redis:7.0.7'
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - 'redis_data:/data'
+    networks:
+      - activepieces
+    ports:
+      - "6379:6379"
+    expose:
+      - 6379
+volumes:
+  evolution_instances:
+  postgres_data:
+  redis_data:
+networks:
+  activepieces:
+    driver: bridge
