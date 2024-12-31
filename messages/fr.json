@@ -1,6 +1,57 @@
 {
-  "HomePage": {
-    "title": "Hello world!",
-    "about": "Go to the about page"
+  "NewsletterForm": {
+    "Subscribe to our newsletter": "Abonnez-vous à notre newsletter",
+    "Subscribe": "S'abonner",
+    "You submitted the following values:": "Vous avez soumis les valeurs suivantes :",
+    "Enter a valid email": "Saisissez une adresse email valide"
+  },
+  "UserAuthForm": {
+    "error_title": "Une erreur est survenue",
+    "error_description": "Votre demande de connexion a échoué. Veuillez réessayer",
+    "success_title": "Vérifiez vos emails",
+    "success_description": "Nous vous avons envoyé un lien de connexion. N'oubliez pas de vérifier vos spams",
+    "email_label": "Email",
+    "email_placeholder": "nom@exemple.com",
+    "signup_email": "S'inscrire avec Email",
+    "signin_email": "Se connecter avec Email",
+    "continue_with": "Ou continuer avec",
+    "google": "Google"
+  },
+  "FeaturesCard": {
+    "payment_received_name": "Paiement reçu",
+    "payment_received_desc": "Abonnement Stripe",
+    "user_signup_name": "Utilisateur inscrit",
+    "user_signup_desc": "Auth, simple et propre",
+    "new_emails_name": "Nouveaux Emails",
+    "new_emails_desc": "Créez de beaux emails",
+    "easy_deploy_name": "Déploiement Facile",
+    "easy_deploy_desc": "Déployez votre application facilement",
+    "15m_ago": "il y a 15m",
+    "10m_ago": "il y a 10m",
+    "5m_ago": "il y a 5m",
+    "2m_ago": "il y a 2m"
+  },
+  "Meteorss": {
+    "discord_name": "Rejoignez notre Discord",
+    "discord_description": "Rejoignez notre serveur Discord pour discuter avec d'autres développeurs et obtenir de l'aide.",
+    "discord_button": "Discutez avec nous"
+  },
+  "TypewriterEffectSmooth": {
+    "word_build": "Créez",
+    "word_awesome": "superbes",
+    "word_apps": "applications",
+    "word_and": "et",
+    "word_ship": "déployez",
+    "word_fast": "rapidement",
+    "word_with": "avec",
+    "word_saasfly": "Saasfly."
+  },
+  "XBlogArticle": {
+    "thumbnail_alt": "vignette",
+    "nextify": "Nextify",
+    "blog_title": "Comprendre les Composants Serveur React",
+    "blog_description": "Voici quelque chose qui me fait sentir vieux : React a fêté ses 10 ans cette année !",
+    "blog_date": "26 Mars 2024",
+    "read_more": "Lire Plus"
   }
 }

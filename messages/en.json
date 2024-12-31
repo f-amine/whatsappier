@@ -1,6 +1,58 @@
 {
-  "HomePage": {
-    "title": "Hello world!",
-    "about": "Go to the about page"
+  "NewsletterForm": {
+    "Subscribe to our newsletter": "Subscribe to our newsletter",
+    "Subscribe":"Subscribe",
+    "You submitted the following values:":"You submitted the following values:",
+    "Enter a valid email":"Enter a valid email"
+  },
+  "UserAuthForm": {
+    "error_title": "Something went wrong",
+    "error_description": "Your sign in request failed. Please try again",
+    "success_title": "Check your email",
+    "success_description": "We sent you a login link. Be sure to check your spam too",
+    "email_label": "Email",
+    "email_placeholder": "name@example.com",
+    "signup_email": "Sign Up with Email",
+    "signin_email": "Sign In with Email", 
+    "continue_with": "Or continue with",
+    "google": "Google"
+  },
+  "FeaturesCard": {
+    "payment_received_name": "Payment received",
+    "payment_received_desc": "Stripe subscription",
+    "user_signup_name": "User signed up",
+    "user_signup_desc": "Auth, simple and clean",
+    "new_emails_name": "New Emails",
+    "new_emails_desc": "Create beautiful emails",
+    "easy_deploy_name": "Easy Deploy", 
+    "easy_deploy_desc": "Deploy your app with ease",
+    "15m_ago": "15m ago",
+    "10m_ago": "10m ago",
+    "5m_ago": "5m ago",
+    "2m_ago": "2m ago"
+  },
+  "Meteorss": {
+    "discord_name": "Join our Discord",
+    "discord_description": "Join our Discord server to chat with other developers and get help.",
+    "discord_button": "Chat with us"
+  },
+  "TypewriterEffectSmooth": {
+    "word_build": "Build",
+    "word_awesome": "awesome",
+    "word_apps": "apps",
+    "word_and": "and",
+    "word_ship": "ship",
+    "word_fast": "fast",
+    "word_with": "with",
+    "word_saasfly": "Saasfly."
+  },
+  "XBlogArticle": {
+    "thumbnail_alt": "thumbnail",
+    "nextify": "Nextify",
+    "blog_title": "Making Sense of React Server Components",
+    "blog_description": "So, here's something that makes me feel old: React celebrated its 10th birthday this year!",
+    "blog_date": "26th March, 2024",
+    "read_more": "Read More"
   }
+
 }

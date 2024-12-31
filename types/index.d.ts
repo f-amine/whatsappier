@@ -37,15 +37,6 @@ export type SidebarNavItem = {
   icon?: keyof typeof Icons;
 };
 
-export interface Meteor {
-  name: string;
-  description: string;
-  button_content: string;
-  url: string;
-}
-
-
-
 export type Cursor = string | null
 
 export type SeekPage<T> = {

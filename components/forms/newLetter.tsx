@@ -15,14 +15,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { useTranslations } from "next-intl";
 
-const FormSchema = z.object({
-  email: z.string().email({
-    message: "Enter a valid email.",
-  }),
-});
+
 
 export function NewsletterForm() {
+  const t = useTranslations('NewsletterForm')
+  const FormSchema = z.object({
+    email: z.string().email({
+      message: t("Enter a valid email"),
+    }),
+  });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -33,7 +36,7 @@ export function NewsletterForm() {
   function onSubmit(data: z.infer<typeof FormSchema>) {
     form.reset();
     toast({
-      title: "You submitted the following values:",
+      title: t("You submitted the following values:"),
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -53,7 +56,7 @@ export function NewsletterForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Subscribe to our newsletter</FormLabel>
+              <FormLabel>{t('Subscribe to our newsletter')}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
@@ -67,7 +70,7 @@ export function NewsletterForm() {
           )}
         />
         <Button type="submit" size="sm" rounded="full" className="px-4">
-          Subscribe
+          {t('Subscribe')}
         </Button>
       </form>
     </Form>

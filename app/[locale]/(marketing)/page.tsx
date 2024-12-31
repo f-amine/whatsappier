@@ -6,15 +6,7 @@ import { TypewriterEffectSmooth } from "@/components/landing/typeWriterEffectSmo
 import { XBlogArticle } from "@/components/landing/xBlogArticle";
 import { Icons } from "@/components/shared/icons";
 import { Link } from "@/i18n/routing";
-import type { Meteor } from "@/types";
 
-const meteors_data: Meteor = {
-  name: "Join our Discord",
-  description:
-    "Join our Discord server to chat with other developers and get help.",
-  button_content: "Chat with us",
-  url: "https://discord.gg/8SwSX43wnD",
-};
 export default function Home() {
   return (
 
@@ -66,7 +58,7 @@ export default function Home() {
 
           <div className="hidden h-full w-full xl:block">
             <div className="flex flex-col pt-28">
-              <Meteorss meteor={meteors_data} />
+              <Meteorss />
               <div className="mt-4 flex w-full justify-between">
                 <XBlogArticle />
                 <div className="ml-4">

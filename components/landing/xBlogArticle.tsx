@@ -1,12 +1,15 @@
+import { useTranslations } from "next-intl";
 import { FollowerPointerCard } from "../ui/following-pointer";
 
 export function XBlogArticle() {
+   const t = useTranslations('XBlogArticle');
+
   return (
     <div className="w-80">
       <FollowerPointerCard
         title={
           <TitleComponent
-            title={blogContent.author}
+            title={t(blogContent.author)}
             avatar={blogContent.authorAvatar}
           />
         }
@@ -21,15 +24,15 @@ export function XBlogArticle() {
           </div>
           <div className=" p-4">
             <h2 className="my-4 text-lg font-bold text-zinc-700">
-              {blogContent.title}
+              {t(blogContent.title)}
             </h2>
             <h2 className="my-4 text-sm font-normal text-zinc-500">
-              {blogContent.description}
+              {t(blogContent.description)}
             </h2>
             <div className="mt-10 flex flex-row items-center justify-between">
-              <span className="text-sm text-gray-500">{blogContent.date}</span>
+              <span className="text-sm text-gray-500">{t(blogContent.date)}</span>
               <div className="relative z-10 block rounded-xl bg-black px-6 py-2 text-xs font-bold text-white">
-                Read More
+                {t("read_more")}
               </div>
             </div>
           </div>
@@ -58,15 +61,21 @@ const TitleComponent = ({
 }: {
   title: string;
   avatar: string;
-}) => (
-  <div className="flex items-center space-x-2">
-    <img
-      src={avatar}
-      height="20"
-      width="20"
-      alt="thumbnail"
-      className="rounded-full border-2 border-white"
-    />
-    <p>{title}</p>
-  </div>
-);
+}) => {
+
+  const t = useTranslations('XBlogArticle');
+
+  return (
+    <div className="flex items-center space-x-2">
+      <img
+        src={avatar}
+        height="20"
+        width="20"
+        alt="thumbnail"
+        className="rounded-full border-2 border-white"
+      />
+      <p>{t(title)}</p>
+    </div>
+  )
+}
+
