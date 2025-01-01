@@ -53,5 +53,37 @@
     "blog_description": "Voici quelque chose qui me fait sentir vieux : React a fêté ses 10 ans cette année !",
     "blog_date": "26 Mars 2024",
     "read_more": "Lire Plus"
-  }
+  },
+   "DevicesPage": {
+     "connect_device": "Connecter l'appareil",
+     "pairing_code": "Code d'appairage :",
+     "devices_deleted": "Appareils supprimés avec succès",
+     "error_deleting": "Erreur lors de la suppression des appareils",
+     "error_connecting": "Échec de la connexion de l'appareil",
+     "device_logged_out": "Appareil déconnecté avec succès",
+     "error_logging_out": "Erreur lors de la déconnexion de l'appareil",
+     "confirm_deletion": "Confirmer la suppression",
+     "confirm_deletion_message": "Êtes-vous sûr de vouloir supprimer les appareils sélectionnés ? Cette action ne peut pas être annulée.",
+     "delete": "Supprimer",
+     "name": "Nom",
+     "phone_number": "Numéro de téléphone",
+     "status": "Statut",
+     "last_updated": "Dernière mise à jour",
+     "logout": "Déconnexion",
+     "connect": "Connecter",
+     "devices": "Appareils", 
+     "manage_description": "Gérez et surveillez tous vos appareils connectés",
+     "create_device": "Créer un appareil",
+     "device_status": "État de l'appareil",
+     "device_connected_success": "Appareil connecté avec succès",
+     "connected": "Connecté",
+     "disconnected": "Déconnecté",
+     "filter_status": "Statut",
+     "filter_search": "Rechercher"
+   },
+   "ConfirmationDeleteDialog": {
+     "removal_success": "{entityName} supprimé",
+     "cancel": "Annuler",
+     "remove": "Supprimer"
+   }
 }

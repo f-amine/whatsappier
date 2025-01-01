@@ -3,6 +3,7 @@
 import { type LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../sidebar"
+import { Link } from "@/i18n/routing"
 
 export function NavMain({
   items,
@@ -30,10 +31,10 @@ export function NavMain({
                 data-active={isActive}
                 className="data-[active=true]:bg-accent data-[active=true]:text-accent-foreground"
               >
-                <a href={item.url}>
+                <Link href={item.url}>
                   <item.icon className="size-4" />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           )

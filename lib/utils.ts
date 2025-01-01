@@ -1,3 +1,4 @@
+import { DeviceStatus } from "@prisma/client"
 import { Static, TSchema, Type } from "@sinclair/typebox"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -12,3 +13,10 @@ export function isNil<T>(value: T | null | undefined): value is null | undefined
 export const Nullable = <T extends TSchema>(schema: T) => Type.Optional(Type.Unsafe<Static<T> | null>({
     ...schema, nullable: true,
 }))
+
+export const statusMap: Record<string, DeviceStatus> = {
+  'open': DeviceStatus.CONNECTED,
+  'connecting': DeviceStatus.CONNECTING,
+  'close': DeviceStatus.DISCONNECTED,
+  'refused': DeviceStatus.ERROR
+}

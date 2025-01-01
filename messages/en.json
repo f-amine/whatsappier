@@ -53,6 +53,37 @@
     "blog_description": "So, here's something that makes me feel old: React celebrated its 10th birthday this year!",
     "blog_date": "26th March, 2024",
     "read_more": "Read More"
-  }
-
+  },
+ "DevicesPage": {
+   "connect_device": "Connect Device",
+   "pairing_code": "Pairing Code:",
+   "devices_deleted": "Devices deleted successfully",
+   "error_deleting": "Error deleting devices",
+   "error_connecting": "Failed to connect device",
+   "device_logged_out": "Device logged out successfully", 
+   "error_logging_out": "Error logging out device",
+   "confirm_deletion": "Confirm Deletion",
+   "confirm_deletion_message": "Are you sure you want to delete the selected devices? This action cannot be undone.",
+   "delete": "Delete",
+   "name": "Name",
+   "phone_number": "Phone Number",
+   "status": "Status",
+   "last_updated": "Last Updated",
+   "logout": "Logout",
+   "connect": "Connect",
+   "devices": "Devices",
+   "manage_description": "Manage and monitor all your connected devices",
+   "create_device": "Create Device",
+   "device_status": "Device Status",
+   "device_connected_success": "Device connected successfully",
+   "connected": "Connected",
+   "disconnected": "Disconnected",
+   "filter_status": "Status",
+   "filter_search": "Search"
+  },
+ "ConfirmationDeleteDialog":{
+   "removal_success": "Removed {entityName}",
+   "cancel": "Cancel",
+   "remove": "Remove"
+ }
 }

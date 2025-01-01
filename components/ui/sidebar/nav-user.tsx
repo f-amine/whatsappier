@@ -26,7 +26,6 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
   const handleLogout = () => {

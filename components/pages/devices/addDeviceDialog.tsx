@@ -12,28 +12,25 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useToast } from '@/hooks/use-toast'
 import { checkConnectionStatus, createWhatsappInstance, WhatsappInstanceData } from '@/lib/mutations/devices'
 import { useMutation } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { set } from 'date-fns'
 
 
 
 interface WhatsappConnectionDialogProps {
   children: React.ReactNode
-  onConnectionCreated?: () => void
-  insideBuilder?: boolean
   onRefresh?: () => void
 }
 
 export function CreateDeviceDialog({
   children,
-  onConnectionCreated,
   onRefresh,
 }: WhatsappConnectionDialogProps) {
   const [open, setOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
-  const { toast } = useToast()
   const [integrationType, setIntegrationType] = useState<'WHATSAPP-BAILEYS' | 'WHATSAPP-BUSINESS'>('WHATSAPP-BAILEYS')
   const [instanceName, setInstanceName] = useState('')
   const [qrData, setQrData] = useState<{base64?: string, code?: string, pairingCode?: string}>()
@@ -47,27 +44,25 @@ export function CreateDeviceDialog({
 
 
   const createWhatsappMutation = useMutation({
-  mutationFn: (whatsappInstanceData: WhatsappInstanceData) =>
-    createWhatsappInstance(whatsappInstanceData),
-  onSuccess: (response) => {
-    setInstanceName(response.instance.instanceName);
-    if (response.qrcode) {
-      setQrData({
-        base64: response.qrcode.base64,
-        code: response.qrcode.code,
-        pairingCode: response.qrcode.pairingCode,
+    mutationFn: (whatsappInstanceData: WhatsappInstanceData) =>
+      createWhatsappInstance(whatsappInstanceData),
+    onSuccess: (response) => {
+      setInstanceName(response.instance.instanceName);
+      if (response.qrcode) {
+        setQrData({
+          base64: response.qrcode.base64,
+          code: response.qrcode.code,
+          pairingCode: response.qrcode.pairingCode,
+        });
+      }
+      setCurrentStep(2);
+    },
+    onError: () => {
+      toast.error(('Error'),{
+        description: 'Failed to create WhatsApp instance',
       });
-    }
-    setCurrentStep(2);
-  },
-  onError: () => {
-    toast({
-      title: 'Error',
-      description: 'Failed to create WhatsApp instance',
-      variant: 'destructive',
-    });
-  },
-});
+    },
+  });
 
   const handleIntegrationTypeChange = (value: 'WHATSAPP-BAILEYS' | 'WHATSAPP-BUSINESS') => {
     setIntegrationType(value)
@@ -88,22 +83,19 @@ export function CreateDeviceDialog({
   const checkStatus = async () => {
     try {
       const response = await checkConnectionStatus(instanceName)
-      if (response.connected) {
-        onConnectionCreated?.()
+      console.log(response)
+      if (response.status === 'CONNECTED') {
         onRefresh?.()
         setOpen(false)
+        setCurrentStep(1)
       } else {
-        toast({
-          title: 'Not Connected',
+        toast.info(('Not Connected'),{
           description: 'Please scan the QR code to connect your WhatsApp instance',
-          variant: 'destructive',
         })
       }
     } catch (error) {
-      toast({
-        title: 'Error',
+      toast.error(('Error'),{
         description: 'Failed to check connection status',
-        variant: 'destructive',
       })
     }
   }
@@ -269,3 +261,4 @@ export function CreateDeviceDialog({
     </Dialog>
   )
 }
+

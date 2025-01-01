@@ -1,6 +1,8 @@
+'use server'
 import { prisma } from "@/lib/db";
 import { Device, DeviceStatus, Prisma } from "@prisma/client";
 import { getCurrentUser } from "../sessions";
+import { checkConnectionStatus } from "../mutations/devices";
 
 export interface DeviceWithMetadata extends Device {
   metadata: Record<string, any> | null;
@@ -77,16 +79,29 @@ export async function getDevices({
       },
     });
 
+    // Check and update status for each device
+    const statusUpdates = await Promise.all(
+      devices.map(async (device) => {
+        try {
+          const statusCheck = await checkConnectionStatus(device.name);
+          return { ...device, status: statusCheck.status };
+        } catch (error) {
+          console.error(`Error checking status for device ${device.name}:`, error);
+          return device; 
+        }
+      })
+    );
+
     let hasNextPage = false;
     let nextCursor: string | undefined;
     let hasPreviousPage = !!cursor;
     let previousCursor: string | undefined;
 
     // If we got an extra item, we have a next page
-    if (devices.length > limit) {
+    if (statusUpdates.length > limit) {
       hasNextPage = true;
-      devices.pop(); // Remove the extra item
-      nextCursor = devices[devices.length - 1]?.id;
+      statusUpdates.pop(); // Remove the extra item
+      nextCursor = statusUpdates[statusUpdates.length - 1]?.id;
     }
 
     if (cursor) {
@@ -102,7 +117,7 @@ export async function getDevices({
       previousCursor = previousItem[0]?.id;
     }
 
-    const transformedDevices = devices.map((device) => ({
+    const transformedDevices = statusUpdates.map((device) => ({
       ...device,
       metadata: device.metadata as Record<string, any> | null,
     }));
@@ -161,58 +176,3 @@ export async function getDeviceById(id: string): Promise<DeviceWithMetadata | nu
   }
 }
 
-export async function updateDeviceStatus(
-  id: string,
-  status: DeviceStatus
-): Promise<DeviceWithMetadata> {
-  const user = await getCurrentUser();
-  
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  if (!id) throw new Error("Device ID is required");
-
-  try {
-    const updatedDevice = await prisma.device.update({
-      where: { 
-        id,
-        userId: user.id
-      },
-      data: { status },
-      include: {
-        connections: {
-          orderBy: {
-            createdAt: "desc",
-          },
-          take: 1,
-        },
-      },
-    });
-
-    return {
-      ...updatedDevice,
-      metadata: updatedDevice.metadata as Record<string, any> | null,
-    };
-  } catch (error) {
-    console.error("Error updating device status:", error);
-    throw error;
-  }
-}
-
-export async function getUserDeviceCount(): Promise<number> {
-  const user = await getCurrentUser();
-  
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  try {
-    return await prisma.device.count({
-      where: { userId: user.id },
-    });
-  } catch (error) {
-    console.error("Error counting user devices:", error);
-    throw error;
-  }
-}

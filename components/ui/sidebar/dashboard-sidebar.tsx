@@ -26,8 +26,8 @@ import { NavResources } from "./nav-ressources"
 import { NavSecondary } from "./nav-secondary"
 import { NavUser } from "./nav-user"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../sidebar"
-import Link from "next/link"
 import { useSession } from "next-auth/react"
+import { Link } from "@/i18n/routing"
 
 
 

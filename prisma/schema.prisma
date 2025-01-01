@@ -79,7 +79,7 @@ model Device {
   id          String       @id @default(cuid())
   userId      String
   user        User         @relation(fields: [userId], references: [id])
-  name        String
+  name        String       @unique
   phoneNumber String
   status      DeviceStatus @default(DISCONNECTED)
   metadata    Json?

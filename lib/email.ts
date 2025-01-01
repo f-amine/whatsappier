@@ -21,10 +21,7 @@ export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
     try {
       const { data, error } = await resend.emails.send({
         from: provider.from,
-        to:
-          process.env.NODE_ENV === "development"
-            ? "delivered@resend.dev"
-            : identifier,
+        to:identifier,
         subject: authSubject,
         react: MagicLinkEmail({
           firstName: user?.name as string,
@@ -43,7 +40,7 @@ export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
         throw new Error(error?.message);
       }
 
-      // console.log(data)
+      console.log(data)
     } catch (error) {
       throw new Error("Failed to send verification email.");
     }
