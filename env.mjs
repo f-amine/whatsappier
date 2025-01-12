@@ -12,9 +12,12 @@ export const env = createEnv({
     DATABASE_URL: z.string().min(1),
     RESEND_API_KEY: z.string().min(1),
     EMAIL_FROM: z.string().min(1),
+    LIGHTFUNNELS_CLIENT_ID: z.string().min(1),
+    LIGHTFUNNELS_CLIENT_SECRET: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().min(1),
+
   },
   runtimeEnv: {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
@@ -25,5 +28,7 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    LIGHTFUNNELS_CLIENT_ID: process.env.LIGHTFUNNELS_CLIENT_ID,
+    LIGHTFUNNELS_CLIENT_SECRET: process.env.LIGHTFUNNELS_CLIENT_SECRET,
   },
 });

@@ -85,5 +85,27 @@
    "removal_success": "Removed {entityName}",
    "cancel": "Cancel",
    "remove": "Remove"
- }
+ },
+"ConnectionsPage": {
+    "connections": "Connections",
+    "manage_description": "Manage your platform connections",
+    "filter_platform": "Filter by Platform",
+    "filter_status": "Filter by Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "create_connection": "New Connection",
+    "connection_status": "Connection Status",
+    "connection_created_success": "Connection created successfully",
+    "connections_deleted": "Connections deleted successfully",
+    "error_deleting": "Error deleting connections",
+    "error_refreshing": "Error refreshing connection",
+    "connection_refreshed": "Connection refreshed successfully",
+    "confirm_deletion": "Confirm Deletion",
+    "confirm_deletion_message": "Are you sure you want to delete these connections?",
+    "delete": "Delete",
+    "refresh": "Refresh Connection",
+    "platform": "Platform",
+    "status": "Status",
+    "created_at": "Created At"
+  }
 }
