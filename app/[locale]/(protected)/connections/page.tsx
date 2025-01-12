@@ -10,10 +10,9 @@ import { TableTitle } from '@/components/tables/table-title'
 import { PermissionNeededTooltip } from '@/components/ui/permission-needed-tooltip'
 import { Button } from '@/components/ui/button'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
-import { ConnectionWithMetadata, getConnections } from '@/lib/data/connections'
-import { CreateConnectionDialog } from '@/components/pages/connections/AddConnectionDialog'
+import { getConnections } from '@/lib/data/connections'
 import { useConnectionColumns } from '@/components/tables/connections/connections-table-collumns'
+import { CreateConnectionDialog } from '@/components/pages/connections/AddConnectionDialog'
 
 export default function ConnectionsPage() {
   const t = useTranslations('ConnectionsPage')
