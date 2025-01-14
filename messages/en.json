@@ -107,5 +107,32 @@
     "platform": "Platform",
     "status": "Status",
     "created_at": "Created At"
+  },
+  "TemplatesPage": {
+    "templates": "Templates",
+    "templates_list": "Templates List",
+    "new_template": "New Template",
+    "templates_deleted": "Templates deleted successfully",
+    "error_deleting": "Error deleting templates",
+    "confirm_deletion": "Confirm Deletion",
+    "confirm_deletion_message": "Are you sure you want to delete the selected templates? This action cannot be undone.",
+    "delete": "Delete",
+    "name": "Name",
+    "content": "Content",
+    "variables": "Variables",
+    "created_at": "Created At",
+    "create_template": "Create Template",
+    "template_name": "Template Name",
+    "template_content": "Template Content",
+    "language": "Language",
+    "category": "Category",
+    "create": "Create",
+    "template_created": "Template Created",
+    "template_created_description": "Your template has been created successfully",
+    "error": "Error",
+    "error_creating_template": "Error creating template",
+    "refresh": "Refresh",
+    "edit": "Edit",
+    "preview": "Preview"
   }
 }
