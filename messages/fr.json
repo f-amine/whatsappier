@@ -123,6 +123,19 @@
     "template_name_placeholder": "Entrez le nom du modèle",
     "template_content_placeholder": "Entrez le contenu du modèle",
     "language_placeholder": "ex: Français",
-    "category_placeholder": "ex: Marketing"
+    "category_placeholder": "ex: Marketing",
+    "save_changes": "Enregistrer les modifications",
+    "template_updated": "Modèle mis à jour",
+    "template_updated_description": "Le modèle a été mis à jour avec succès",
+    "error_updating_template": "Erreur lors de la mise à jour du modèle",
+    "template_deleted": "Modèle supprimé",
+    "template_deleted_description": "Le modèle a été supprimé avec succès",
+    "available_formatting": "Mise en forme disponible",
+    "bold_text": "Texte en gras",
+    "italic_text": "Texte en italique",
+    "bullet_list": "Liste à puces",
+    "insert_variable": "Insérer une variable",
+    "reset_sample_data": "Réinitialiser les données d'exemple",
+    "whatsapp_preview": "Aperçu WhatsApp"
     }
 }

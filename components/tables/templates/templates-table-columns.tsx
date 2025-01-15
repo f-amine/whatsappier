@@ -15,7 +15,8 @@ import { RowDataWithActions, BulkAction } from "@/components/tables/data-table"
 import { DataTableColumnHeader } from "../table-collumn-header"
 import { ConfirmationDeleteDialog } from "@/components/ui/delete-dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { bulkDeleteTemplates } from "@/lib/mutations/templates"
+import { bulkDeleteTemplates, deleteTemplate } from "@/lib/mutations/templates"
+import { EditTemplateDialog } from "@/components/pages/templates/EditTemplateDialog"
 
 export interface TemplateWithVariables extends Template {
   variables: string[]
@@ -25,6 +26,21 @@ export const useTemplateColumns = (refetch: () => void) => {
   const t = useTranslations('TemplatesPage')
   const [selectedRows, setSelectedRows] = useState<TemplateWithVariables[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  const deleteTemplateMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return deleteTemplate(id)
+    },
+    onSuccess: () => {
+      toast.success(t('template_deleted'))
+      refetch()
+    },
+    onError: (error) => {
+      toast.error(t('error_deleting'), {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    },
+  })
 
   const bulkDeleteMutation = useMutation({
     mutationFn: async (ids: string[]) => {
@@ -81,7 +97,7 @@ export const useTemplateColumns = (refetch: () => void) => {
         },
       }
     ],
-    [bulkDeleteMutation, isDialogOpen, selectedRows]
+    [bulkDeleteMutation, isDialogOpen, selectedRows, t]
   )
 
   const columns: ColumnDef<RowDataWithActions<TemplateWithVariables>, unknown>[] = [
@@ -180,6 +196,8 @@ export const useTemplateColumns = (refetch: () => void) => {
     {
       id: "actions",
       cell: ({ row }) => {
+        const template = row.original
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -188,23 +206,34 @@ export const useTemplateColumns = (refetch: () => void) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation()
-                  // Handle edit
+              <EditTemplateDialog
+                template={template}
+                trigger={
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    {t('edit')}
+                  </DropdownMenuItem>
+                }
+                onEdit={refetch}
+              />
+              <ConfirmationDeleteDialog
+                title={t('confirm_deletion')}
+                message={t('confirm_deletion_message')}
+                entityName="template"
+                mutationFn={async () => {
+                  try {
+                    await deleteTemplateMutation.mutateAsync(template.id)
+                  } catch (error) {
+                    console.error('Error deleting template:', error)
+                  }
                 }}
               >
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  // Handle delete
-                }}
-              >
-                Delete
-              </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  {t('delete')}
+                </DropdownMenuItem>
+              </ConfirmationDeleteDialog>
             </DropdownMenuContent>
           </DropdownMenu>
         )

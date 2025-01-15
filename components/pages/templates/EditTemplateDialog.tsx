@@ -1,4 +1,3 @@
-// components/pages/templates/AddTemplateDialog.tsx
 "use client"
 
 import { useForm } from "react-hook-form"
@@ -12,11 +11,12 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Eye, MessageSquare } from "lucide-react"
-import { createTemplate } from "@/lib/mutations/templates"
+import { updateTemplate } from "@/lib/mutations/templates"
 import { useToast } from "@/hooks/use-toast"
 import { TemplateEditor } from "./editor/TemplateEditor"
 import { TemplatePreview } from "./editor/TemplatePreview"
-import { templateCategories, TemplateCategory } from "./editor/template-variables"
+import { templateCategories } from "./editor/template-variables"
+import { Template } from "@prisma/client"
 
 const FormSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -27,17 +27,23 @@ const FormSchema = z.object({
 
 type FormData = z.infer<typeof FormSchema>
 
-export function CreateTemplateDialog({ children }: { children: React.ReactNode }) {
+interface EditTemplateDialogProps {
+  template: Template
+  trigger: React.ReactNode
+  onEdit: () => void
+}
+
+export function EditTemplateDialog({ template, trigger, onEdit }: EditTemplateDialogProps) {
   const t = useTranslations('TemplatesPage')
   const { toast } = useToast()
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: "",
-      content: "",
-      category: "order_confirmation",
-      language: "en",
+      name: template.name,
+      content: template.content,
+      category: template.category,
+      language: template.language,
     }
   })
 
@@ -56,11 +62,11 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
     const content = form.getValues('content')
     const textarea = document.querySelector('textarea')
     if (!textarea) return
-  
+
     const start = textarea.selectionStart
     const end = textarea.selectionEnd
     const selectedText = content.substring(start, end)
-  
+
     let newContent = content
     switch (type) {
       case 'bold':
@@ -70,45 +76,26 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
         newContent = content.substring(0, start) + `_${selectedText}_` + content.substring(end)
         break
       case 'list':
-        // If there's selected text, format each line
-        if (selectedText) {
-          const lines = selectedText.split('\n')
-          const listItems = lines
-            .map(line => line.trim())
-            .filter(line => line.length > 0)
-            .map(line => line.startsWith('• ') ? line : `• ${line}`)
-            .join('\n')
-          newContent = content.substring(0, start) + listItems + content.substring(end)
-        } else {
-          // If no text is selected, insert a new bullet point
-          newContent = content.substring(0, start) + '• ' + content.substring(end)
-        }
+        const lines = selectedText ? selectedText.split('\n') : ['']
+        const listItems = lines.map(line => `• ${line}`).join('\n')
+        newContent = content.substring(0, start) + listItems + content.substring(end)
         break
     }
     form.setValue('content', newContent)
-    
-    // Restore focus to textarea
-    setTimeout(() => {
-      textarea.focus()
-      textarea.setSelectionRange(
-        start + (type === 'list' ? 2 : 1),
-        end + (type === 'list' ? 2 : 1)
-      )
-    }, 0)
   }
 
   const onSubmit = async (data: FormData) => {
     try {
-      await createTemplate(data)
-      form.reset()
+      await updateTemplate({ id: template.id, ...data })
       toast({
-        title: t('template_created'),
-        description: t('template_created_description'),
+        title: t('template_updated'),
+        description: t('template_updated_description'),
       })
+      onEdit()
     } catch (error) {
       toast({
         title: t('error'),
-        description: t('error_creating_template'),
+        description: t('error_updating_template'),
         variant: "destructive",
       })
     }
@@ -116,10 +103,10 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
 
   return (
     <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>{t('create_template')}</DialogTitle>
+          <DialogTitle>{t('edit_template')}</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="edit" className="w-full">
@@ -138,7 +125,6 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Template Name Field */}
                   <FormField
                     control={form.control}
                     name="name"
@@ -153,7 +139,6 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
                     )}
                   />
 
-                  {/* Category Selection */}
                   <FormField
                     control={form.control}
                     name="category"
@@ -180,7 +165,6 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
                   />
                 </div>
 
-                {/* Template Editor Component */}
                 <TemplateEditor
                   form={form}
                   onInsertVariable={insertVariable}
@@ -188,7 +172,7 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
                 />
 
                 <Button type="submit" className="w-full">
-                  {t('create')}
+                  {t('save_changes')}
                 </Button>
               </form>
             </Form>
