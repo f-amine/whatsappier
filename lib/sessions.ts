@@ -1,12 +1,13 @@
-import "server-only";
-
-import { cache } from "react";
-import { auth } from "@/auth";
+import "server-only"
+import { cache } from "react"
+import { auth } from "@/auth"
 
 export const getCurrentUser = cache(async () => {
-  const session = await auth();
-  if (!session?.user) {
-    return undefined;
+  try {
+    const session = await auth()
+    return session?.user ?? null 
+  } catch (error) {
+    console.error('Error getting current user:', error)
+    return null
   }
-  return session.user;
-});
+})

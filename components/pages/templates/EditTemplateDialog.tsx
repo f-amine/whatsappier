@@ -1,22 +1,22 @@
 "use client"
 
+import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useTranslations } from "next-intl"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Eye, MessageSquare } from "lucide-react"
-import { updateTemplate } from "@/lib/mutations/templates"
 import { useToast } from "@/hooks/use-toast"
+import { Template } from "@prisma/client"
+import { templateCategories } from "./editor/template-variables"
 import { TemplateEditor } from "./editor/TemplateEditor"
 import { TemplatePreview } from "./editor/TemplatePreview"
-import { templateCategories } from "./editor/template-variables"
-import { Template } from "@prisma/client"
 
 const FormSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -31,11 +31,20 @@ interface EditTemplateDialogProps {
   template: Template
   trigger: React.ReactNode
   onEdit: () => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function EditTemplateDialog({ template, trigger, onEdit }: EditTemplateDialogProps) {
+export function EditTemplateDialog({ 
+  template, 
+  trigger, 
+  onEdit,
+  open,
+  onOpenChange 
+}: EditTemplateDialogProps) {
   const t = useTranslations('TemplatesPage')
   const { toast } = useToast()
+  const [isOpen, setIsOpen] = useState(false)
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
@@ -76,22 +85,56 @@ export function EditTemplateDialog({ template, trigger, onEdit }: EditTemplateDi
         newContent = content.substring(0, start) + `_${selectedText}_` + content.substring(end)
         break
       case 'list':
-        const lines = selectedText ? selectedText.split('\n') : ['']
-        const listItems = lines.map(line => `• ${line}`).join('\n')
-        newContent = content.substring(0, start) + listItems + content.substring(end)
+        // If there's selected text, format each line
+        if (selectedText) {
+          const lines = selectedText.split('\n')
+          const listItems = lines
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .map(line => line.startsWith('• ') ? line : `• ${line}`)
+            .join('\n')
+          newContent = content.substring(0, start) + listItems + content.substring(end)
+        } else {
+          // If no text is selected, insert a new bullet point
+          newContent = content.substring(0, start) + '• ' + content.substring(end)
+        }
         break
     }
     form.setValue('content', newContent)
+    
+    // Restore focus to textarea
+    setTimeout(() => {
+      textarea.focus()
+      textarea.setSelectionRange(
+        start + (type === 'list' ? 2 : 1),
+        end + (type === 'list' ? 2 : 1)
+      )
+    }, 0)
+  }
+
+  // Extract variables from content
+  const extractVariables = (content: string): string[] => {
+    const matches = content.match(/{{([^}]+)}}/g) || []
+    return [...new Set(matches.map(match => match.slice(2, -2)))]
   }
 
   const onSubmit = async (data: FormData) => {
     try {
-      await updateTemplate({ id: template.id, ...data })
+      const variables = extractVariables(data.content)
+      
+      await updateTemplate({
+        id: template.id,
+        ...data,
+        variables,
+      })
+
       toast({
         title: t('template_updated'),
         description: t('template_updated_description'),
       })
+      
       onEdit()
+      setIsOpen(false)
     } catch (error) {
       toast({
         title: t('error'),
@@ -102,7 +145,7 @@ export function EditTemplateDialog({ template, trigger, onEdit }: EditTemplateDi
   }
 
   return (
-    <Dialog>
+    <Dialog open={open ?? isOpen} onOpenChange={onOpenChange ?? setIsOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
@@ -113,11 +156,11 @@ export function EditTemplateDialog({ template, trigger, onEdit }: EditTemplateDi
           <TabsList>
             <TabsTrigger value="edit" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
-              Edit
+              {t('edit')}
             </TabsTrigger>
             <TabsTrigger value="preview" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
-              Preview
+              {t('preview')}
             </TabsTrigger>
           </TabsList>
           
@@ -148,13 +191,13 @@ export function EditTemplateDialog({ template, trigger, onEdit }: EditTemplateDi
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
+                              <SelectValue placeholder={t('category_placeholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {templateCategories.map((category) => (
                               <SelectItem key={category.value} value={category.value}>
-                                {category.label}
+                                {t(`categories.${category.value}`)}
                               </SelectItem>
                             ))}
                           </SelectContent>

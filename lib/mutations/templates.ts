@@ -1,54 +1,87 @@
-// lib/mutations/templates.ts
 'use server'
 
 import { prisma } from "@/lib/db"
 import { getCurrentUser } from "@/lib/sessions"
 import { revalidatePath } from "next/cache"
+import type { Template } from "@prisma/client"
 
 export interface CreateTemplateInput {
   name: string
   content: string
-  variables: string[]
+  category: string
+  language: string
+  variables?: string[]
 }
 
 export interface UpdateTemplateInput extends Partial<CreateTemplateInput> {
   id: string
 }
 
-export async function createTemplate(data: CreateTemplateInput) {
-  const user = await getCurrentUser()
-  
-  if (!user) {
-    throw new Error("Unauthorized")
-  }
-
+export async function createTemplate(data: CreateTemplateInput): Promise<Template> {
   try {
+    const user = await getCurrentUser()
+    
+    if (!user?.id) {
+      throw new Error("Unauthorized: No user found")
+    }
+
+    // First ensure user exists in database
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id }
+    })
+
+    if (!dbUser) {
+      // If user doesn't exist, create them
+      await prisma.user.create({
+        data: {
+          id: user.id,
+          name: user.name || '',
+          email: user.email || '',
+          image: user.image || '',
+        }
+      })
+    }
+
+    // Create the template
     const template = await prisma.template.create({
       data: {
         userId: user.id,
         name: data.name,
         content: data.content,
-        variables: data.variables,
-      },
+        category: data.category,
+        language: data.language,
+        variables: data.variables || []
+      }
     })
 
     revalidatePath('/templates')
     return template
-  } catch (error) {
-    console.error('Error creating template:', error)
-    throw new Error('Failed to create template')
+
+  } catch (err) {
+    const error = err as Error
+    console.log('Template creation failed:', {
+      name: error.name,
+      message: error.message,
+      data: {
+        name: data.name,
+        category: data.category,
+        language: data.language,
+        variablesCount: data.variables?.length
+      }
+    })
+    
+    throw error
   }
 }
 
 export async function updateTemplate({ id, ...data }: UpdateTemplateInput) {
-  const user = await getCurrentUser()
-  
-  if (!user) {
-    throw new Error("Unauthorized")
-  }
-
   try {
-    // First verify the template belongs to the user
+    const user = await getCurrentUser()
+    
+    if (!user?.id) {
+      throw new Error("Unauthorized: No user found")
+    }
+
     const template = await prisma.template.findFirst({
       where: {
         id,
@@ -62,26 +95,29 @@ export async function updateTemplate({ id, ...data }: UpdateTemplateInput) {
 
     const updatedTemplate = await prisma.template.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        variables: data.variables || template.variables,
+      }
     })
 
     revalidatePath('/templates')
     return updatedTemplate
+
   } catch (error) {
-    console.error('Error updating template:', error)
-    throw new Error('Failed to update template')
+    console.log('Template update failed:', error)
+    throw error
   }
 }
 
-export async function deleteTemplate(templateId: string) {
-  const user = await getCurrentUser()
-  
-  if (!user) {
-    throw new Error("Unauthorized")
-  }
-
+export async function deleteTemplate(templateId: string): Promise<{ success: boolean }> {
   try {
-    // First verify the template belongs to the user
+    const user = await getCurrentUser()
+    
+    if (!user?.id) {
+      throw new Error("Unauthorized: No user found")
+    }
+
     const template = await prisma.template.findFirst({
       where: {
         id: templateId,
@@ -99,21 +135,21 @@ export async function deleteTemplate(templateId: string) {
 
     revalidatePath('/templates')
     return { success: true }
+
   } catch (error) {
-    console.error('Error deleting template:', error)
-    throw new Error('Failed to delete template')
+    console.log('Template deletion failed:', error)
+    throw error
   }
 }
 
-export async function bulkDeleteTemplates(templateIds: string[]) {
-  const user = await getCurrentUser()
-  
-  if (!user) {
-    throw new Error("Unauthorized")
-  }
-
+export async function bulkDeleteTemplates(templateIds: string[]): Promise<{ success: boolean }> {
   try {
-    // First verify all templates belong to the user
+    const user = await getCurrentUser()
+    
+    if (!user?.id) {
+      throw new Error("Unauthorized: No user found")
+    }
+
     const templates = await prisma.template.findMany({
       where: {
         id: { in: templateIds },
@@ -134,8 +170,9 @@ export async function bulkDeleteTemplates(templateIds: string[]) {
 
     revalidatePath('/templates')
     return { success: true }
+
   } catch (error) {
-    console.error('Error bulk deleting templates:', error)
-    throw new Error('Failed to delete templates')
+    console.log('Bulk template deletion failed:', error)
+    throw error
   }
 }

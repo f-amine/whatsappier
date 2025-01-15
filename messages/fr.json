@@ -136,6 +136,16 @@
     "bullet_list": "Liste à puces",
     "insert_variable": "Insérer une variable",
     "reset_sample_data": "Réinitialiser les données d'exemple",
-    "whatsapp_preview": "Aperçu WhatsApp"
+    "whatsapp_preview": "Aperçu WhatsApp",
+    "categories": {
+      "order_confirmation": "Confirmation de commande",
+      "shipping_update": "Mise à jour de livraison",
+      "abandoned_cart": "Panier abandonné",
+      "payment_received": "Paiement reçu",
+      "delivery_confirmation": "Confirmation de livraison",
+      "feedback_request": "Demande de feedback",
+      "promotion": "Promotion",
+      "welcome": "Message de bienvenue"
+    }
     }
 }

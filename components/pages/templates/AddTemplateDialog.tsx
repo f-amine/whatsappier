@@ -1,6 +1,6 @@
-// components/pages/templates/AddTemplateDialog.tsx
 "use client"
 
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -30,6 +30,7 @@ type FormData = z.infer<typeof FormSchema>
 export function CreateTemplateDialog({ children }: { children: React.ReactNode }) {
   const t = useTranslations('TemplatesPage')
   const { toast } = useToast()
+  const [isOpen, setIsOpen] = useState(false)
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
@@ -70,7 +71,6 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
         newContent = content.substring(0, start) + `_${selectedText}_` + content.substring(end)
         break
       case 'list':
-        // If there's selected text, format each line
         if (selectedText) {
           const lines = selectedText.split('\n')
           const listItems = lines
@@ -80,14 +80,12 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
             .join('\n')
           newContent = content.substring(0, start) + listItems + content.substring(end)
         } else {
-          // If no text is selected, insert a new bullet point
           newContent = content.substring(0, start) + '• ' + content.substring(end)
         }
         break
     }
     form.setValue('content', newContent)
     
-    // Restore focus to textarea
     setTimeout(() => {
       textarea.focus()
       textarea.setSelectionRange(
@@ -97,25 +95,64 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
     }, 0)
   }
 
+  // Extract variables from content
+  const extractVariables = (content: string): string[] => {
+    const matches = content.match(/{{([^}]+)}}/g) || []
+    return [...new Set(matches.map(match => match.slice(2, -2)))]
+  }
+
   const onSubmit = async (data: FormData) => {
     try {
-      await createTemplate(data)
-      form.reset()
-      toast({
-        title: t('template_created'),
-        description: t('template_created_description'),
+      const variables = extractVariables(data.content)
+      
+      const templateData = {
+        name: data.name,
+        content: data.content,
+        category: data.category,
+        language: data.language,
+        variables
+      }
+
+      // Log before submission
+      console.log('Submitting template:', {
+        ...templateData,
+        contentLength: templateData.content.length,
+        variablesCount: variables.length
       })
-    } catch (error) {
+
+      const template = await createTemplate(templateData)
+
+      if (template?.id) {
+        console.log('Template created successfully:', {
+          id: template.id,
+          name: template.name
+        })
+        
+        form.reset()
+        setIsOpen(false)
+        toast({
+          title: t('template_created'),
+          description: t('template_created_description'),
+        })
+      }
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to create template')
+      
+      console.log('Template creation failed:', {
+        message: error.message,
+        name: error.name
+      })
+      
       toast({
         title: t('error'),
-        description: t('error_creating_template'),
+        description: error.message || t('error_creating_template'),
         variant: "destructive",
       })
     }
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
@@ -126,11 +163,11 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
           <TabsList>
             <TabsTrigger value="edit" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
-              Edit
+              {t('edit')}
             </TabsTrigger>
             <TabsTrigger value="preview" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
-              Preview
+              {t('preview')}
             </TabsTrigger>
           </TabsList>
           
@@ -138,7 +175,6 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Template Name Field */}
                   <FormField
                     control={form.control}
                     name="name"
@@ -153,7 +189,6 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
                     )}
                   />
 
-                  {/* Category Selection */}
                   <FormField
                     control={form.control}
                     name="category"
@@ -163,13 +198,13 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
+                              <SelectValue placeholder={t('category_placeholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {templateCategories.map((category) => (
                               <SelectItem key={category.value} value={category.value}>
-                                {category.label}
+                                {t(`categories.${category.value}`)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -178,9 +213,31 @@ export function CreateTemplateDialog({ children }: { children: React.ReactNode }
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="language"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('language')}</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('language_placeholder')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="fr">Français</SelectItem>
+                            <SelectItem value="ar">العربية</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
-                {/* Template Editor Component */}
                 <TemplateEditor
                   form={form}
                   onInsertVariable={insertVariable}
