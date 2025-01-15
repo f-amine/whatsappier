@@ -17,6 +17,7 @@ import { Template } from "@prisma/client"
 import { templateCategories } from "./editor/template-variables"
 import { TemplateEditor } from "./editor/TemplateEditor"
 import { TemplatePreview } from "./editor/TemplatePreview"
+import { updateTemplate } from "@/lib/mutations/templates"
 
 const FormSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -85,7 +86,6 @@ export function EditTemplateDialog({
         newContent = content.substring(0, start) + `_${selectedText}_` + content.substring(end)
         break
       case 'list':
-        // If there's selected text, format each line
         if (selectedText) {
           const lines = selectedText.split('\n')
           const listItems = lines
@@ -95,14 +95,12 @@ export function EditTemplateDialog({
             .join('\n')
           newContent = content.substring(0, start) + listItems + content.substring(end)
         } else {
-          // If no text is selected, insert a new bullet point
           newContent = content.substring(0, start) + '• ' + content.substring(end)
         }
         break
     }
     form.setValue('content', newContent)
     
-    // Restore focus to textarea
     setTimeout(() => {
       textarea.focus()
       textarea.setSelectionRange(
@@ -112,7 +110,6 @@ export function EditTemplateDialog({
     }, 0)
   }
 
-  // Extract variables from content
   const extractVariables = (content: string): string[] => {
     const matches = content.match(/{{([^}]+)}}/g) || []
     return [...new Set(matches.map(match => match.slice(2, -2)))]
@@ -125,7 +122,7 @@ export function EditTemplateDialog({
       await updateTemplate({
         id: template.id,
         ...data,
-        variables,
+        variables
       })
 
       toast({
@@ -136,9 +133,10 @@ export function EditTemplateDialog({
       onEdit()
       setIsOpen(false)
     } catch (error) {
+      console.error('Template update error:', error)
       toast({
         title: t('error'),
-        description: t('error_updating_template'),
+        description: error instanceof Error ? error.message : t('error_updating_template'),
         variant: "destructive",
       })
     }
@@ -200,6 +198,29 @@ export function EditTemplateDialog({
                                 {t(`categories.${category.value}`)}
                               </SelectItem>
                             ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="language"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('language')}</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('language_placeholder')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="fr">Français</SelectItem>
+                            <SelectItem value="ar">العربية</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
