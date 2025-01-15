@@ -1,4 +1,3 @@
-// components/pages/templates/AddTemplateDialog.tsx
 "use client"
 
 import { useForm } from "react-hook-form"

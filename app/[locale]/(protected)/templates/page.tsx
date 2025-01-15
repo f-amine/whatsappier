@@ -10,26 +10,12 @@ interface Props {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export default async function TemplatesPage({
-  params,
-  searchParams,
-}: Props) {
+export default async function TemplatesPage(props: Props) {
   const t = await getTranslations('TemplatesPage')
-  
-  // Safely extract and transform search params
-  let limit = 10
-  let cursor: string | undefined = undefined
 
-  if (typeof searchParams.limit === 'string') {
-    const parsedLimit = parseInt(searchParams.limit)
-    if (!isNaN(parsedLimit)) {
-      limit = parsedLimit
-    }
-  }
-
-  if (typeof searchParams.cursor === 'string') {
-    cursor = searchParams.cursor
-  }
+  // Default values for pagination
+  const limit = 10
+  const cursor = undefined
 
   const templates = await getTemplates({
     cursor,
@@ -38,7 +24,7 @@ export default async function TemplatesPage({
 
   return (
     <div className="container mx-auto py-4">
-      <Suspense fallback={<DataTableSkeleton columnCount={5} rowCount={5} />}>
+      <Suspense fallback={<DataTableSkeleton skeletonRowCount={5} />}>
         <TemplateList templates={templates} />
       </Suspense>
     </div>
