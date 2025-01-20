@@ -143,6 +143,8 @@ model Template {
   name       String
   content    String       @db.Text
   variables  String[]
+  category   String       @default("order_confirmation") 
+  language   String       @default("en")                
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   runs       Run[]
@@ -151,7 +153,6 @@ model Template {
 
   @@index([userId])
 }
-
 model Broadcast {
   id           String          @id @default(cuid())
   connectionId String
