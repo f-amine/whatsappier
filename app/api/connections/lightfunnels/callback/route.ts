@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error in LightFunnels callback:', error)
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/connections?error=connection_failed`
+      `${process.env.NEXT_PUBLIC_APP_URL}/en/connections?error=connection_failed`
     )
   }
 }

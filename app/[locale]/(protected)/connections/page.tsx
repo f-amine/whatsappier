@@ -19,7 +19,7 @@ export default function ConnectionsPage() {
  
   const platformOptions = [
     { label: 'Shopify', value: Platform.SHOPIFY, icon: Link2Icon },
-    { label: 'Light Funnels', value: Platform.LIGHTFUNNELS, icon: Link2Icon },
+    { label: 'LightFunnels', value: Platform.LIGHTFUNNELS, icon: Link2Icon },
     { label: 'Google Sheets', value: Platform.GOOGLE_SHEETS, icon: Link2Icon }
   ]
 

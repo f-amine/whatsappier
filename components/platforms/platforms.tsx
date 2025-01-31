@@ -20,8 +20,20 @@ export const platformRegistry: Record<Platform, PlatformConfig> = {
   [Platform.GOOGLE_SHEETS]: {
     info: PLATFORM_INFO[Platform.GOOGLE_SHEETS],
     platform: Platform.GOOGLE_SHEETS,
-    component: undefined,
-    connectHandler: async (props) => {
+    connectHandler: async ({ onSuccess, onError, onCancel }) => {
+      try {
+        const response = await fetch("/api/connections/google-sheets/auth-url");
+        const data = await response.json();
+
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error("Failed to get Google Sheets authentication URL");
+        }
+      } catch (error) {
+        console.error("Google Sheets connection error:", error);
+        onError(error instanceof Error ? error : new Error("Google Sheets connection failed"));
+      }
     }
   }
 }

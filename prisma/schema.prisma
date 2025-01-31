@@ -263,7 +263,6 @@ enum Platform {
   SHOPIFY
   LIGHTFUNNELS
   GOOGLE_SHEETS
-  // Add other platforms as needed
 }
 
 enum Plan {

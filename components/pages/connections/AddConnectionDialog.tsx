@@ -31,7 +31,6 @@ export function CreateConnectionDialog({
     const config = platformRegistry[platform]
     
     if (!config.component) {
-      // If no component, directly call the connect handler
       try {
         await config.connectHandler({
           onSuccess: handleSuccess,
