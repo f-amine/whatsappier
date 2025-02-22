@@ -11,7 +11,6 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "../
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar"
 import { useTransition } from "react"
-import { useRouter } from "next/navigation"
 import { signOut } from "next-auth/react"
 
 

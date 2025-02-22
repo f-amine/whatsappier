@@ -134,5 +134,58 @@
     "refresh": "Refresh",
     "edit": "Edit",
     "preview": "Preview"
+  },
+  "AutomationsPage": {
+    "automations": "Automations",
+    "manage_description": "Manage and monitor your automation workflows",
+    "create_automation": "New Automation",
+    "automation_created": "Automation Created",
+    "automation_created_description": "Your automation has been created successfully",
+    "automation_deleted": "Automation deleted successfully",
+    "automations_deleted": "Automations deleted successfully",
+    "error_creating": "Error creating automation",
+    "error_deleting": "Error deleting automation(s)",
+    "confirm_deletion": "Confirm Deletion",
+    "confirm_deletion_message": "Are you sure you want to delete the selected automations? This action cannot be undone.",
+    "delete": "Delete",
+    "start": "Start Automation",
+    "stop": "Stop Automation",
+
+    "filter_trigger": "Filter by Trigger",
+    "filter_status": "Filter by Status",
+    "active": "Active",
+    "inactive": "Inactive",
+
+    "webhook": "Webhook",
+    "schedule": "Schedule",
+    "api": "API",
+    "event": "Event",
+
+    "name": "Name",
+    "description": "Description",
+    "automation_name": "Automation Name",
+    "trigger": "Trigger",
+    "status": "Status",
+    "connection": "Connection",
+    "template": "Template",
+    "device": "Device",
+
+    "select_connection": "Select a connection",
+    "select_template": "Select a template",
+    "select_device": "Select a device",
+    "trigger_type": "Trigger Type",
+
+    "webhook_endpoint": "Webhook URL",
+    "webhook_endpoint_description": "The URL that will receive webhook events",
+    "cron_expression": "Cron Expression",
+    "cron_description": "Schedule using cron syntax (e.g. * * * * *)",
+    "event_type": "Event Type",
+    "select_event_type": "Select an event type",
+    "api_key": "API Key",
+    "api_key_description": "API key for authentication",
+
+    "cancel": "Cancel",
+    "create": "Create",
+    "save": "Save Changes"
   }
 }

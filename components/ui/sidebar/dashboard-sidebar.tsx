@@ -4,6 +4,7 @@ import * as React from "react"
 import {
     Activity,
   AlertCircle,
+  Bot,
   Cable,
   Command,
   FileText,
@@ -28,12 +29,20 @@ import { NavUser } from "./nav-user"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../sidebar"
 import { useSession } from "next-auth/react"
 import { Link } from "@/i18n/routing"
+import { title } from "process"
 
 
 
 
 const data = {
   navMain: [
+    {
+      title: "Automations",
+      url: "/automations",
+      icon : Bot,
+      isActive: true,
+      items: []
+    },
     {
       title: "Devices",
       url: "/devices",

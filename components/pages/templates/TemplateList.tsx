@@ -1,4 +1,3 @@
-// components/pages/templates/TemplateList.tsx
 "use client"
 
 import { useTranslations } from 'next-intl'
@@ -48,21 +47,13 @@ export function TemplateList({ templates }: TemplateListProps) {
           </Button>
         </CreateTemplateDialog>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('templates_list')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            columns={columns}
-            page={templates}
-            bulkActions={bulkActions}
-            isLoading={false}
-            onPaginationChange={handlePaginationChange}
-          />
-        </CardContent>
-      </Card>
+      <DataTable
+        columns={columns}
+        page={templates}
+        bulkActions={bulkActions}
+        isLoading={false}
+        onPaginationChange={handlePaginationChange}
+      />
     </>
   )
 }

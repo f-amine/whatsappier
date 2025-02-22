@@ -132,6 +132,8 @@ model Connection {
   Device      Device?      @relation(fields: [deviceId], references: [id])
   deviceId    String?
   Automation  Automation[]
+  orders      Order[]
+  checkouts   Checkout[]
 
   @@index([userId, platform])
 }
@@ -257,6 +259,49 @@ model Analytics {
   updatedAt    DateTime @updatedAt
 
   @@index([userId, periodStart, periodEnd])
+}
+
+model Order {
+  id            String       @id @default(cuid())
+  connectionId  String
+  connection    Connection   @relation(fields: [connectionId], references: [id])
+  customerName  String
+  customerEmail String
+  status        OrderStatus @default(PENDING)
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([connectionId])
+  @@index([status])
+}
+
+model Checkout {
+  id            String          @id @default(cuid())
+  connectionId  String
+  connection    Connection      @relation(fields: [connectionId], references: [id])
+  customerName  String
+  customerEmail String
+  status        CheckoutStatus @default(ABANDONED)
+  metadata      Json?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([connectionId])
+  @@index([status])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  NOT_CONFIRMED
+  IN_PROGRESS
+}
+
+enum CheckoutStatus {
+  COMPLETED
+  ABANDONED
+  RECOVERED
 }
 
 enum Platform {
