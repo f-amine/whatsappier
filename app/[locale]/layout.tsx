@@ -47,20 +47,20 @@ export default async function RootLayout({
         min-h-screen bg-background font-sans antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
-        <QueryProviders>
-        <SessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-              <ModalProvider>{children}</ModalProvider>
-            <Toaster richColors closeButton />
-          </ThemeProvider>
-      </SessionProvider>
-      </QueryProviders>
-      </NextIntlClientProvider>
+          <QueryProviders>
+            <SessionProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  <ModalProvider>{children}</ModalProvider>
+                  <Toaster richColors closeButton />
+                </ThemeProvider>
+            </SessionProvider>
+          </QueryProviders>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

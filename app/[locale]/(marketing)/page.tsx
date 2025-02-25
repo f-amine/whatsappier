@@ -1,13 +1,16 @@
 import { DocumentGuide } from "@/components/landing/document-guide";
 import { FeaturesCard } from "@/components/landing/featuresCard";
 import { Meteorss } from "@/components/landing/meteors";
+import { Pricing } from "@/components/landing/pricing";
 import ShimmerButton from "@/components/landing/shimmerButton";
 import { TypewriterEffectSmooth } from "@/components/landing/typeWriterEffectSmooth";
 import { XBlogArticle } from "@/components/landing/xBlogArticle";
 import { Icons } from "@/components/shared/icons";
 import { Link } from "@/i18n/routing";
+import './home-page.css';
+export default async function Home() {
+  const country = 'US';
 
-export default function Home() {
   return (
 
       <section className="w-full px-8 sm:px-48 md:px-48 xl:h-[100vh] xl:px-48">
@@ -68,6 +71,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <Pricing country={country}/>
       </section>
 
 

@@ -50,7 +50,7 @@ export const TypewriterEffectImpl = ({
     return (
       <motion.span ref={scope} className="inline">
         {wordsArray.map((word, idx) => (
-          <React.Fragment key={`word-${idx}`}>
+          <React.Fragment key={idx}>
             {word.text.map((char, index) => (
               <motion.span
                 initial={{}}

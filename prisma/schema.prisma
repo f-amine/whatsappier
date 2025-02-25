@@ -62,17 +62,37 @@ model User {
   createdAt     DateTime  @default(now()) @map(name: "created_at")
   updatedAt     DateTime  @default(now()) @map(name: "updated_at")
 
+  paddleCustomerId String?    @unique
+  paddleSubscription PaddleSubscription?
+
   accounts Account[]
   sessions Session[]
 
   connections   Connection[]
   templates     Template[]
-  subscriptions Subscription[]
   analytics     Analytics[]
   devices       Device[]
-  flows         Automation[]
+  automations   Automation[]
 
   @@map(name: "users")
+}
+
+model PaddleSubscription {
+  id                String                  @id @default(cuid())
+  subscriptionId    String                  @unique 
+  status            PaddleSubscriptionStatus
+  priceId          String
+  productId        String
+  userId           String                  @unique 
+  user             User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paddleCustomerId String
+  scheduledChange  DateTime?
+  currentPeriodEnd DateTime?
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  @@index([userId])
+  @@map(name: "paddle_subscriptions")
 }
 
 model Device {
@@ -228,23 +248,6 @@ model Usage {
   @@index([subscriptionId, periodStart, periodEnd])
 }
 
-model Subscription {
-  id           String    @id @default(cuid())
-  userId       String
-  user         User      @relation(fields: [userId], references: [id])
-  plan         Plan // Enum for different subscription plans
-  status       SubStatus @default(ACTIVE)
-  startDate    DateTime  @default(now())
-  endDate      DateTime?
-  messageQuota Int // Monthly message limit
-  metadata     Json? // Additional subscription details
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  Usage        Usage[]
-
-  @@index([userId, status])
-}
-
 model Analytics {
   id           String   @id @default(cuid())
   userId       String
@@ -359,4 +362,12 @@ enum TriggerType {
   SCHEDULE
   API
   EVENT
+}
+
+enum PaddleSubscriptionStatus {
+  active
+  trialing
+  paused
+  canceled 
+  past_due
 }
