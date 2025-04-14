@@ -1,31 +1,35 @@
+// /whatsappier/app/[locale]/(protected)/automations/page.tsx (No changes needed from your last version)
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { DataTable } from "@/components/tables/data-table"
+import { useRouter, useSearchParams } from 'next/navigation' // Use standard next/navigation
+import { DataTable, DataTableFilter } from "@/components/tables/data-table"
 import { TriggerType } from '@prisma/client'
 import { Plus, Workflow, SignalIcon } from 'lucide-react'
-import { DataTableFilter, RowDataWithActions } from '@/components/tables/data-table'
 import { TableTitle } from '@/components/tables/table-title'
 import { PermissionNeededTooltip } from '@/components/ui/permission-needed-tooltip'
 import { Button } from '@/components/ui/button'
 import { useTranslations } from 'next-intl'
 import { useAutomationColumns } from '@/components/tables/automations/automations-table-columns'
-import { CreateAutomationDialog } from '@/components/pages/automations/AddAutomationDialog'
-import { AutomationWithMeta } from '@/lib/data/automations'
-import { getAutomations } from '@/lib/data/automations'
+import { AutomationWithMeta, getAutomations } from '@/lib/data/automations' // Import getAutomations
+import { Link } from '@/i18n/routing' // Use next-intl Link
+import React from 'react' // Import React for useMemo, useCallback
+import { SeekPage } from '@/types'
 
 export default function AutomationsPage() {
-  const t = useTranslations('AutomationsPage')
- 
-  const triggerOptions = [
+  const t = useTranslations('AutomationsPage');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Filter Definitions
+  const triggerOptions = React.useMemo(() => [
     { label: t('webhook'), value: TriggerType.WEBHOOK, icon: Workflow },
     { label: t('schedule'), value: TriggerType.SCHEDULE, icon: Workflow },
     { label: t('api'), value: TriggerType.API, icon: Workflow },
     { label: t('event'), value: TriggerType.EVENT, icon: Workflow }
-  ]
+  ], [t]);
 
-  const filters: DataTableFilter<string>[] = [
+  const filters: DataTableFilter<string>[] = React.useMemo(() => [
     {
       type: 'select',
       title: t('filter_trigger'),
@@ -43,72 +47,85 @@ export default function AutomationsPage() {
         { label: t('inactive'), value: 'false', icon: SignalIcon }
       ],
     }
-  ]
+  ], [t, triggerOptions]);
 
-  const searchParams = useSearchParams()
-
-  const { data, isLoading, refetch } = useQuery({
+  // --- Fetching Data ---
+  const { data: queryData, isLoading, refetch } = useQuery({
     queryKey: ['automations', searchParams.toString()],
     queryFn: async () => {
-      const cursor = searchParams.get('cursor')
-      const limit = searchParams.get('limit') 
-        ? parseInt(searchParams.get('limit')!) 
-        : 10
-      const trigger = searchParams.getAll('trigger') as TriggerType[]
-      const isActive = searchParams.get('isActive')
+      const cursor = searchParams.get('cursor');
+      const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10;
+      const triggerParam = searchParams.getAll('trigger');
+      const trigger = triggerParam.length > 0 && Object.values(TriggerType).includes(triggerParam[0] as TriggerType)
+          ? [triggerParam[0] as TriggerType]
+          : undefined;
+      const isActiveParam = searchParams.get('isActive');
+      const isActive = isActiveParam === 'true' ? true : isActiveParam === 'false' ? false : undefined;
 
       return getAutomations({
-        cursor,
+        cursor: cursor ?? undefined,
         limit,
-        trigger: trigger.length > 0 ? trigger[0] : undefined,
-        isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
-      })
-    }
-  })
+        trigger: trigger ? trigger[0] : undefined,
+        isActive: isActive,
+      });
+    },
+  });
 
-  const { columns, bulkActions } = useAutomationColumns(refetch)
-  const transformedData = data?.data.map(automation => ({
-    ...automation,
-    delete: () => {},
-    update: (payload: Partial<AutomationWithMeta>) => {}
-  })) as RowDataWithActions<AutomationWithMeta>[] | undefined
+  // --- Get Columns and Bulk Actions from Hook ---
+  // Hook now only needs refetch
+  const { columns, bulkActions } = useAutomationColumns({ refetch });
+
+  // --- Prepare data for DataTable component ---
+   // DataTable needs a specific page shape
+   const pageForDataTable: SeekPage<AutomationWithMeta> | undefined = React.useMemo(() => queryData ? {
+     data: queryData.data,
+     next: queryData.nextCursor ?? null,
+     previous: queryData.previousCursor ?? null
+   } : undefined, [queryData]);
+
+  // --- Pagination Handler (Passed to DataTable) ---
+   const handlePaginationChange = React.useCallback((cursor: string | undefined | null, limit: number) => {
+        const newParams = new URLSearchParams(searchParams.toString());
+        if (cursor) {
+            newParams.set('cursor', cursor);
+        } else {
+            newParams.delete('cursor');
+        }
+        newParams.set('limit', limit.toString());
+        router.push(`?${newParams.toString()}`, { scroll: false });
+   }, [searchParams, router]);
+
 
   return (
     <div className="flex flex-col gap-4 w-full">
-      <div className="flex">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <TableTitle description={t('manage_description')}>
           {t('automations')}
         </TableTitle>
         <div className="ml-auto flex flex-row gap-2">
           <PermissionNeededTooltip hasPermission={true}>
-            <CreateAutomationDialog
-              onRefresh={() => {
-                refetch()
-              }}
-            >
+            <Link href="/automations/create">
               <Button
-                disabled={false}
                 variant="outline"
                 className="flex gap-2 items-center"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 w-4" />
                 {t('create_automation')}
               </Button>
-            </CreateAutomationDialog>
+            </Link>
           </PermissionNeededTooltip>
         </div>
       </div>
+
+      {/* DataTable */}
       <DataTable
         columns={columns}
-        page={data ? {
-          data: transformedData!,
-          next: data.nextCursor,
-          previous: data.previousCursor
-        } : undefined}
+        page={pageForDataTable}
         isLoading={isLoading}
         filters={filters}
         bulkActions={bulkActions}
       />
     </div>
-  )
+  );
 }

@@ -33,7 +33,6 @@ export interface PlatformConfig {
   connectHandler: (props: PlatformConnectionProps) => Promise<void>
 }
 
-// Platform configuration
 export const PLATFORM_INFO = {
   [Platform.LIGHTFUNNELS]: {
     name: 'LightFunnels',

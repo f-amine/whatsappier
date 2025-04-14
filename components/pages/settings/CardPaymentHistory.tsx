@@ -14,12 +14,12 @@ interface Props {
 }
 
 export function CardPaymentHistory({ subscriptionId, transactions }: Props) {
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'pending': return 'bg-amber-500';
-      case 'failed': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'completed': return 'completed';
+      case 'pending': return 'pending';
+      case 'failed': return 'failed';
+      default: return 'default_status';
     }
   };
 
@@ -44,7 +44,7 @@ export function CardPaymentHistory({ subscriptionId, transactions }: Props) {
                     <div className="font-medium">{formattedPrice}</div>
                     <div className="text-sm text-muted-foreground">{transactionDate}</div>
                   </div>
-                  <Badge className={`${getStatusColor(transaction.status)}`}>
+                  <Badge variant={getStatusVariant(transaction.status)}>
                     {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
                   </Badge>
                 </div>
@@ -62,18 +62,12 @@ export function CardPaymentHistory({ subscriptionId, transactions }: Props) {
           )}
         </div>
       </CardContent>
-      <CardFooter className="border-t bg-muted/50 py-3">
-        <Button 
-          asChild 
-          variant="ghost" 
-          size="sm" 
-          className="w-full justify-center"
-        >
-          <Link href={`/payments/${subscriptionId}`}>
-            View all transactions
-          </Link>
-        </Button>
-      </CardFooter>
+      <Link href={`/payments/${subscriptionId}`}>
+        <CardFooter className="border-t bg-muted/50 py-3">
+          View all transactions
+        </CardFooter>
+      </Link>
+
     </Card>
   );
 }

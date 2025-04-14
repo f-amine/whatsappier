@@ -32,7 +32,7 @@ services:
       - activepieces
   redis:
     image: 'redis:7.0.7'
-    container_name: redis
+    container_name: redis1
     restart: unless-stopped
     volumes:
       - 'redis_data:/data'

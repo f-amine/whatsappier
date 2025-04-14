@@ -52,7 +52,7 @@ export class ProcessWebhook {
           paddleCustomerId: eventData.data.customerId,
           scheduledChange: eventData.data.scheduledChange?.effectiveAt,
           currentPeriodEnd: new Date(eventData.data.currentBillingPeriod?.endsAt ?? ''),
-          userId: user.id  // Add this explicit userId field
+          userId: user.id
         },
       });
     } catch (error) {

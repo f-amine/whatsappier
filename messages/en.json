@@ -1,9 +1,9 @@
 {
   "NewsletterForm": {
     "Subscribe to our newsletter": "Subscribe to our newsletter",
-    "Subscribe":"Subscribe",
-    "You submitted the following values:":"You submitted the following values:",
-    "Enter a valid email":"Enter a valid email"
+    "Subscribe": "Subscribe",
+    "You submitted the following values:": "You submitted the following values:",
+    "Enter a valid email": "Enter a valid email"
   },
   "UserAuthForm": {
     "error_title": "Something went wrong",
@@ -13,7 +13,7 @@
     "email_label": "Email",
     "email_placeholder": "name@example.com",
     "signup_email": "Sign Up with Email",
-    "signin_email": "Sign In with Email", 
+    "signin_email": "Sign In with Email",
     "continue_with": "Or continue with",
     "google": "Google"
   },
@@ -24,7 +24,7 @@
     "user_signup_desc": "Auth, simple and clean",
     "new_emails_name": "New Emails",
     "new_emails_desc": "Create beautiful emails",
-    "easy_deploy_name": "Easy Deploy", 
+    "easy_deploy_name": "Easy Deploy",
     "easy_deploy_desc": "Deploy your app with ease",
     "15m_ago": "15m ago",
     "10m_ago": "10m ago",
@@ -54,39 +54,39 @@
     "blog_date": "26th March, 2024",
     "read_more": "Read More"
   },
- "DevicesPage": {
-   "connect_device": "Connect Device",
-   "pairing_code": "Pairing Code:",
-   "devices_deleted": "Devices deleted successfully",
-   "error_deleting": "Error deleting devices",
-   "error_connecting": "Failed to connect device",
-   "device_logged_out": "Device logged out successfully", 
-   "error_logging_out": "Error logging out device",
-   "confirm_deletion": "Confirm Deletion",
-   "confirm_deletion_message": "Are you sure you want to delete the selected devices? This action cannot be undone.",
-   "delete": "Delete",
-   "name": "Name",
-   "phone_number": "Phone Number",
-   "status": "Status",
-   "last_updated": "Last Updated",
-   "logout": "Logout",
-   "connect": "Connect",
-   "devices": "Devices",
-   "manage_description": "Manage and monitor all your connected devices",
-   "create_device": "Create Device",
-   "device_status": "Device Status",
-   "device_connected_success": "Device connected successfully",
-   "connected": "Connected",
-   "disconnected": "Disconnected",
-   "filter_status": "Status",
-   "filter_search": "Search"
+  "DevicesPage": {
+    "connect_device": "Connect Device",
+    "pairing_code": "Pairing Code:",
+    "devices_deleted": "Devices deleted successfully",
+    "error_deleting": "Error deleting devices",
+    "error_connecting": "Failed to connect device",
+    "device_logged_out": "Device logged out successfully",
+    "error_logging_out": "Error logging out device",
+    "confirm_deletion": "Confirm Deletion",
+    "confirm_deletion_message": "Are you sure you want to delete the selected devices? This action cannot be undone.",
+    "delete": "Delete",
+    "name": "Name",
+    "phone_number": "Phone Number",
+    "status": "Status",
+    "last_updated": "Last Updated",
+    "logout": "Logout",
+    "connect": "Connect",
+    "devices": "Devices",
+    "manage_description": "Manage and monitor all your connected devices",
+    "create_device": "Create Device",
+    "device_status": "Device Status",
+    "device_connected_success": "Device connected successfully",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "filter_status": "Status",
+    "filter_search": "Search"
   },
- "ConfirmationDeleteDialog":{
-   "removal_success": "Removed {entityName}",
-   "cancel": "Cancel",
-   "remove": "Remove"
- },
-"ConnectionsPage": {
+  "ConfirmationDeleteDialog": {
+    "removal_success": "Removed {entityName}",
+    "cancel": "Cancel",
+    "remove": "Remove"
+  },
+  "ConnectionsPage": {
     "connections": "Connections",
     "manage_description": "Manage your platform connections",
     "filter_platform": "Filter by Platform",
@@ -108,7 +108,7 @@
     "status": "Status",
     "created_at": "Created At"
   },
-  "TemplatesPage": {
+  "TemplatesPage": { 
     "templates": "Templates",
     "templates_list": "Templates List",
     "new_template": "New Template",
@@ -124,18 +124,40 @@
     "create_template": "Create Template",
     "template_name": "Template Name",
     "template_content": "Template Content",
-    "language": "Language",
-    "category": "Category",
-    "create": "Create",
+    "language": "Language", 
+    "category": "Category", 
+    "create": "Create", 
     "template_created": "Template Created",
     "template_created_description": "Your template has been created successfully",
     "error": "Error",
     "error_creating_template": "Error creating template",
     "refresh": "Refresh",
-    "edit": "Edit",
-    "preview": "Preview"
+    "edit": "Edit", 
+    "preview": "Preview", 
+    "bold_text": "Bold Text", 
+    "italic_text": "Italic Text", 
+    "bullet_list": "Bullet List", 
+    "insert_variable": "Insert Variable", 
+    "available_formatting": "Available formatting", 
+    "category_placeholder": "Select a category", 
+    "language_placeholder": "Select a language", 
+    "save_changes": "Save Changes", 
+    "edit_template": "Edit Template", 
+    "template_updated": "Template Updated", 
+    "template_updated_description": "Your template changes have been saved.", 
+    "error_updating_template": "Error updating template", 
+    "categories": { 
+      "order_confirmation": "Order Confirmation",
+      "shipping_update": "Shipping Update",
+      "abandoned_cart": "Abandoned Cart",
+      "payment_received": "Payment Received",
+      "delivery_confirmation": "Delivery Confirmation",
+      "feedback_request": "Feedback Request",
+      "promotion": "Promotion",
+      "welcome": "Welcome Message"
+    }
   },
-  "AutomationsPage": {
+  "AutomationsPage": { 
     "automations": "Automations",
     "manage_description": "Manage and monitor your automation workflows",
     "create_automation": "New Automation",
@@ -150,17 +172,14 @@
     "delete": "Delete",
     "start": "Start Automation",
     "stop": "Stop Automation",
-
     "filter_trigger": "Filter by Trigger",
     "filter_status": "Filter by Status",
     "active": "Active",
     "inactive": "Inactive",
-
     "webhook": "Webhook",
     "schedule": "Schedule",
     "api": "API",
     "event": "Event",
-
     "name": "Name",
     "description": "Description",
     "automation_name": "Automation Name",
@@ -169,12 +188,10 @@
     "connection": "Connection",
     "template": "Template",
     "device": "Device",
-
     "select_connection": "Select a connection",
     "select_template": "Select a template",
     "select_device": "Select a device",
     "trigger_type": "Trigger Type",
-
     "webhook_endpoint": "Webhook URL",
     "webhook_endpoint_description": "The URL that will receive webhook events",
     "cron_expression": "Cron Expression",
@@ -183,26 +200,57 @@
     "select_event_type": "Select an event type",
     "api_key": "API Key",
     "api_key_description": "API key for authentication",
-
     "cancel": "Cancel",
-    "create": "Create",
-    "save": "Save Changes"
+    "create": { 
+      "title": "Create New Automation",
+      "description": "Select a template to start building your automation.",
+      "noTemplates": "No automation templates available yet.",
+      "backToTemplates": "Back to Templates",
+      "configureTitle": "Configure '{templateName}'",
+      "configureDescription": "{templateDescription}",
+      "submitButton": "Create Automation",
+      "success": {
+        "title": "Automation Created",
+        "description": "The automation '{name}' has been successfully created and is now active."
+      },
+      "errors": {
+        "templateNotFound": "Selected automation template could not be found.",
+        "submitFailed": "Failed to create automation",
+        "unknown": "An unknown error occurred.",
+        "configValidationFailed": "Configuration validation failed. Please check the fields.",
+        "connectionAccessDenied": "Selected connection not found or access denied.",
+        "deviceAccessDenied": "Selected device not found or access denied.",
+        "deviceNotConnected": "Selected device is not connected. Please connect it first.",
+        "templateAccessDenied": "Selected message template not found or access denied.",
+        "saveFailed": "Failed to save the automation to the database.",
+        "invalidSignature": "Invalid webhook signature.",
+        "invalidPayload": "Received invalid webhook payload.",
+        "webhookProcessingFailed": "Internal server error processing webhook."
+      }
+    },
+    "save": "Save Changes",
+    "search_connections": "Search connections...",
+    "no_connections_found": "No connections found",
+    "loading": "Loading...", 
+    "search_templates": "Search templates...",
+    "no_templates_found": "No templates found",
+    "search_devices": "Search devices...",
+    "no_devices_found": "No devices found"
   },
   "OrdersPage": {
     "orders": "Orders",
     "manage_description": "Manage and track your orders across all platforms",
     "customer_name": "Customer Name",
     "customer_email": "Customer Email",
-    "status": "Status",
-    "created_at": "Created At",
-    "filter_status": "Filter by Status",
-    "change_status": "Change Status",
-    "status": {
+    "status": { 
       "pending": "Pending",
       "confirmed": "Confirmed",
       "not_confirmed": "Not Confirmed",
       "in_progress": "In Progress"
     },
+    "created_at": "Created At",
+    "filter_status": "Filter by Status",
+    "change_status": "Change Status",
     "delete": "Delete",
     "order_deleted": "Order deleted successfully",
     "orders_deleted": "Orders deleted successfully",
@@ -242,6 +290,48 @@
     "tax": "Tax",
     "amount": "Amount",
     "total": "Total (Inc. tax)",
-    "change_plan": "Change plan"
+    "change_plan": "Change plan",
+    "appearance_settings": "Appearance Settings",
+    "appearance_description": "Customize the look and feel of the application.",
+    "current_theme": "Current theme",
+    "select_language": "Select Language",
+    "available_languages": "Available Languages",
+    "language_preview": "Language Preview",
+    "language_preview_text": "This is how text will appear in the selected language.",
+    "current_language": "Current language",
+    "apply_language": "Apply"
+  },
+  "AutomationBuilder": {
+    "goBack": "goBack",
+    "save": "Save Changes"
+  },
+  "Common": {
+    "close": "Close"
+  },
+  "AutomationTemplates": { 
+    "lf-order-to-whatsapp": {
+      "config": {
+        "lightfunnelsConnectionId": {
+          "label": "Lightfunnels Store Connection"
+        },
+        "funnelId": {
+          "label": "Specific Funnel ID",
+          "placeholder": "Enter the ID of the funnel to monitor"
+        },
+        "whatsappDeviceId": {
+          "label": "WhatsApp Device to Send From"
+        },
+        "messageTemplateId": {
+          "label": "WhatsApp Message Template"
+        }
+      }
+    }
+  },
+  "executionErrors": {
+    "missingDeviceId": "WhatsApp Device ID is missing in automation config.",
+    "missingTemplateId": "Message Template ID is missing in automation config.",
+    "missingPhoneNumber": "Customer phone number not found in trigger payload.",
+    "deviceUnavailable": "Required WhatsApp device not found or not connected.",
+    "templateNotFound": "Required message template not found."
   }
 }
