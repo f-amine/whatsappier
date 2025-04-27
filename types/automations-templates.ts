@@ -54,6 +54,7 @@ export interface AutomationTemplateDefinition<TConfig extends ConfigSchema = Con
   // Function on the backend to execute this automation
   // This is conceptual - the actual execution will be linked via the id
   executionLogicIdentifier: string; // e.g., 'executeLfOrderToWhatsapp'
+  replyHandlerIdentifier: string;
 
   // Optional: Pre-filled default config values
   defaultConfig?: Partial<z.infer<TConfig>>;

@@ -21,16 +21,14 @@ import { Button } from '@/components/ui/button'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getConnections } from '@/lib/data/connections'
-import { Platform } from '@prisma/client'; // Import Platform enum
+import { Platform } from '@prisma/client'
 
-// Add platformFilter prop
 export function ConnectionSelector({ form, name, platformFilter }: { form: any, name: string, platformFilter?: Platform }) {
-  const t = useTranslations('AutomationsPage') // Or specific component translations
+  const t = useTranslations('AutomationsPage')
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
 
-  // Debounce the search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search)
@@ -39,34 +37,32 @@ export function ConnectionSelector({ form, name, platformFilter }: { form: any, 
     return () => clearTimeout(timer)
   }, [search])
 
-  // Update query key to include platformFilter
-  const queryKey = ['connections', debouncedSearch, platformFilter];
+  const queryKey = ['connections', debouncedSearch, platformFilter]
   const { data: response, isLoading } = useQuery({
     queryKey: queryKey,
     queryFn: async () => {
       const response = await getConnections({
         search: debouncedSearch,
-        platform: platformFilter, // Pass the filter here
+        platform: platformFilter,
         limit: 20
       })
       return response
-    }
+    },
+    enabled: true
   })
 
   const connections = response?.data || []
   const selectedValue = form.watch(name)
   const selectedConnection = connections.find(connection => connection.id === selectedValue)
 
-  // Get display name from metadata if available (e.g., Shopify store name)
   const getDisplayName = (connection: typeof connections[0]) => {
       if (connection.platform === Platform.SHOPIFY && connection.metadata?.shopData?.name) {
-          return `${connection.platform} - ${connection.metadata.shopData.name} (${connection.credentials?.originalDomain || connection.id.substring(0, 6)})`;
+          return `${connection.platform} - ${connection.metadata.shopData.name} (${connection.credentials?.originalDomain || connection.id.substring(0, 6)})`
       }
-       if (connection.platform === Platform.LIGHTFUNNELS && connection.metadata?.shopName) { // Assuming you store shopName
-          return `${connection.platform} - ${connection.metadata.shopName} (${connection.id.substring(0, 6)})`;
+       if (connection.platform === Platform.LIGHTFUNNELS && connection.metadata?.shopName) {
+          return `${connection.platform} - ${connection.metadata.shopName} (${connection.id.substring(0, 6)})`
        }
-      // Fallback display
-      return `${connection.platform} - ${connection.id.substring(0, 6)}`;
+      return `${connection.platform} - ${connection.id.substring(0, 6)}`
   }
 
   return (
@@ -82,7 +78,7 @@ export function ConnectionSelector({ form, name, platformFilter }: { form: any, 
               className="w-full justify-between"
             >
               {selectedValue && selectedConnection ? (
-                 getDisplayName(selectedConnection) // Use display name function
+                 getDisplayName(selectedConnection)
               ) : (
                 t('select_connection')
               )}
@@ -107,7 +103,7 @@ export function ConnectionSelector({ form, name, platformFilter }: { form: any, 
                     {connections.map(connection => (
                         <CommandItem
                         key={connection.id}
-                        value={connection.id} // Use ID for value
+                        value={connection.id}
                         onSelect={() => {
                             form.setValue(name, connection.id)
                             setOpen(false)
@@ -119,7 +115,7 @@ export function ConnectionSelector({ form, name, platformFilter }: { form: any, 
                             selectedValue === connection.id ? "opacity-100" : "opacity-0"
                             )}
                         />
-                         {getDisplayName(connection)} {/* Use display name function */}
+                         {getDisplayName(connection)}
                         </CommandItem>
                     ))}
                     </CommandGroup>

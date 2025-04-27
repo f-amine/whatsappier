@@ -1,7 +1,3 @@
-// /whatsappier/lib/automations/TriggerHandler.ts
-// ****** UPDATE THIS FILE ******
-import { prisma } from '@/lib/db';
-import { TriggerType } from '@prisma/client';
 import { AutomationExecutor } from './engine/AutomationExecutor'; // Import the executor
 import { WebhookPayload } from './helpers/lightfunnels'; // Keep this if needed
 

@@ -40,14 +40,19 @@ export async function GET(request: Request) {
       );
     }
 
+    // Store with proper expiry time and refresh token
     await prisma.connection.create({
       data: {
         userId: user.id,
         platform: Platform.GOOGLE_SHEETS,
         credentials: {
           accessToken: tokenResponse.access_token,
-          refreshToken: tokenResponse.refresh_token ?? null, // Might not be present for short-lived tokens
-          expiresAt: new Date(Date.now() + tokenResponse.expires_in * 1000),
+          refreshToken: tokenResponse.refresh_token,
+          expiresAt: tokenResponse.expires_in 
+            ? new Date(Date.now() + tokenResponse.expires_in * 1000).toISOString() 
+            : null,
+          tokenType: tokenResponse.token_type || 'Bearer',
+          scope: tokenResponse.scope || 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive'
         },
         metadata: {
           connectedAt: new Date().toISOString(),

@@ -60,6 +60,25 @@ export interface WebhookResponse {
   settings: WebhookSettings;
 }
 
+export interface FunnelNode {
+  id: string;
+  _id: number;
+  name: string;
+  published: boolean;
+  slug: string;
+  created_at: string;
+}
+
+export interface FunnelEdge {
+  node: FunnelNode;
+  cursor: string;
+}
+
+export interface FunnelsResponse {
+  edges: FunnelEdge[];
+  pageInfo: PageInfo;
+}
+
 export interface OrderQueryOptions {
   first?: number;
   after?: string;
@@ -187,7 +206,6 @@ export interface LightfunnelsOrderConfirmedNode {
     financial_status?: OrderFinancialStatus | string;
 }
 
-// Wrapper Payload (remains the same)
 export interface LightfunnelsWebhookEventPayload {
     node: Record<string, any> | LightfunnelsOrderConfirmedNode; // Could use a union of all possible node types later
 }
@@ -406,6 +424,51 @@ export class LightFunnelsService {
     });
   }
 
+  async getFunnels(options: { first?: number; after?: string, query?: string } = {}): Promise<{ id: string; name: string }[]> {
+    const { first = 10, after = "", query: queryFilter = "order_by:id published:true" } = options; // Default query
+
+    const query = `
+      query FunnelsQuery($first: Int, $after: String, $query: String!) {
+        funnels(query: $query, after: $after, first: $first) {
+          edges {
+            node {
+              id
+              name
+            }
+            cursor
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+      }
+    `;
+
+    const response = await this.lf({
+      data: {
+        query,
+        variables: { first, after, query: queryFilter },
+      },
+    });
+
+    // Defensive check for data structure
+    if (!response || !response.data || !response.data.funnels || !response.data.funnels.edges) {
+        console.error("Unexpected response structure from Lightfunnels Funnels API:", response);
+        throw new Error("Invalid response structure received from Lightfunnels API.");
+    }
+
+    const funnelsData = response.data.funnels as FunnelsResponse;
+
+    // Extract only id and name
+    const funnelsList = funnelsData.edges.map(edge => ({
+      id: edge.node.id,
+      name: edge.node.name,
+    }));
+
+    return funnelsList;
+  }
+
   // Order Methods
   private buildQueryString(options: OrderQueryOptions): string {
     const parts: string[] = [];
@@ -576,111 +639,5 @@ export class LightFunnelsService {
 
     return response.data.updateOrder;
   }
-
-  static createWebhookHandler(handler: WebhookHandler) {
-    return async (req: NextApiRequest, res: NextApiResponse) => {
-      try {
-        if (req.method !== 'POST') {
-          return res.status(405).json({ error: 'Method not allowed' });
-        }
-
-        const accountId = req.query['account-id'] as string;
-        if (!accountId) {
-          return res.status(400).json({ error: 'Missing account ID' });
-        }
-
-        const connection = await prisma.connection.findFirst({
-          where: {
-            metadata: {
-              path: ['accountId'],
-              equals: accountId
-            },
-            platform: 'LIGHTFUNNELS',
-            isActive: true
-          }
-        });
-
-        if (!connection) {
-          return res.status(404).json({ error: 'Connection not found' });
-        }
-
-        const payload = req.body as WebhookPayload;
-        
-        await handler(payload, connection, req, res);
-
-        return res.status(200).json({ success: true });
-      } catch (error) {
-        console.error('Error handling webhook:', error);
-        return res.status(500).json({ error: 'Internal server error' });
-      }
-    };
-  }
-
-  static handleOrderConfirmation = LightFunnelsService.createWebhookHandler(async (payload, connection, req, res) => {
-    const customer = await prisma.customer.upsert({
-      where: {
-        email_connectionId: {
-          email: payload.email,
-          connectionId: connection.id
-        }
-      },
-      create: {
-        connectionId: connection.id,
-        email: payload.email,
-        phone: payload.phone,
-        name: payload.customer?.full_name || '',
-        externalId: payload.customer?.id || ''
-      },
-      update: {
-        phone: payload.phone,
-        name: payload.customer?.full_name || '',
-        externalId: payload.customer?.id || ''
-      }
-    });
-
-    await prisma.order.create({
-      data: {
-        connectionId: connection.id,
-        customerId: customer.id,
-        customerName: customer.name,
-        customerEmail: customer.email,
-        status: 'CONFIRMED',
-        externalId: payload.id,
-        externalOrderNumber: payload._id.toString(),
-        total: payload.total,
-        metadata: payload
-      }
-    });
-
-    // You can add automation triggering here
-    // await triggerAutomations(connection.userId, 'ORDER_CONFIRMED', payload);
-  });
 }
 
-
-
-
-
-// // Example usage
-// const lfService = new LightFunnelsService(connection.credentials.accessToken);
-//
-// // Create webhook
-// const webhook = await lfService.createOrderConfirmationWebhook(
-//   'https://yourapp.com/api/webhooks/lightfunnels/order-confirmation',
-//   'account-123'
-// );
-//
-// // Get orders
-// const orders = await lfService.getOrders({
-//   financialStatus: OrderFinancialStatus.PAID,
-//   first: 10
-// });
-//
-// // Get specific order
-// const order = await lfService.getOrderById('order-id');
-//
-// // Update order
-// await lfService.updateOrder('order-id', {
-//   notes: 'Updated by automation',
-//   tags: ['processed']
-// });

@@ -235,6 +235,7 @@ model Run {
   FailedRun      FailedRun[]
   phoneNumber    String?     // New: Store the normalized phone number the initial message was sent TO
   aiResult       Json?       // New: Store the classification from AI
+  metadata       Json?
 
   // Indexes for performance
   @@index([userId])

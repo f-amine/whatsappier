@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   url.searchParams.append("redirect_uri", redirectUri);
   url.searchParams.append("response_type", "code");
   url.searchParams.append("access_type", "offline");
-  url.searchParams.append("scope", "https://www.googleapis.com/auth/spreadsheets");
+  url.searchParams.append("scope", "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive");
   url.searchParams.append("prompt", "consent");
 
   return NextResponse.json({ url: url.toString() });

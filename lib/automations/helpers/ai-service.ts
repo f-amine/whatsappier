@@ -1,86 +1,142 @@
+// File: /whatsappier/lib/automations/helpers/ai-service.ts
+
 import { env } from '@/env.mjs';
+import {
+    GoogleGenerativeAI,
+    HarmCategory,
+    HarmBlockThreshold,
+    GenerationConfig,
+    SafetySetting,
+    Schema, // Import Schema type
+    SchemaType // Import SchemaType enum
+} from "@google/generative-ai";
 
-// Add GEMINI_API_KEY to your .env file
-const GEMINI_API_KEY = env.GEMINI_API_KEY;
-// const GEMINI_API_ENDPOINT = "YOUR_GEMINI_API_ENDPOINT"; // Replace if needed
+const VALID_CLASSIFICATIONS = ['CONFIRM', 'DECLINE', 'UNCLEAR'] as const;
+export type ReplyClassification = typeof VALID_CLASSIFICATIONS[number];
 
-export type ReplyClassification = 'CONFIRM' | 'DECLINE' | 'UNCLEAR';
+interface ClassificationResponse {
+    classification: ReplyClassification;
+}
 
 export class GeminiService {
 
-    /**
-     * Classifies a customer's reply regarding an order confirmation.
-     * @param replyText The text of the customer's reply.
-     * @returns The classification ('CONFIRM', 'DECLINE', 'UNCLEAR').
-     */
-    static async classifyOrderReply(replyText: string): Promise<ReplyClassification> {
-        console.log(`[GeminiService] Classifying reply: "${replyText}"`);
+    private static genAIInstance: GoogleGenerativeAI | null = null;
 
-        if (!GEMINI_API_KEY) {
-            console.error("[GeminiService] Error: GEMINI_API_KEY is not set.");
-            // Fallback or throw error depending on desired behavior without AI
-            return 'UNCLEAR'; // Default to UNCLEAR if AI is not configured
-            // throw new Error("Gemini API Key not configured.");
+    private static getGenAI(): GoogleGenerativeAI {
+        if (!this.genAIInstance) {
+            const apiKey = env.GEMINI_API_KEY;
+            if (!apiKey) {
+                console.error("[GeminiService] Error: GEMINI_API_KEY is not set in environment variables.");
+                throw new Error("Gemini API Key not configured.");
+            }
+            this.genAIInstance = new GoogleGenerativeAI(apiKey);
         }
+        return this.genAIInstance;
+    }
 
-        // --- Placeholder Logic ---
-        // Replace this with your actual Gemini API call
-        await new Promise(res => setTimeout(res, 500)); // Simulate network delay
+    static async classifyOrderReply(replyText: string,  metadata: Record<string, any> | null): Promise<ReplyClassification> {
+        const sentMessageContent  = metadata?.sentMessageContent || null;
 
-        const lowerReply = replyText.toLowerCase();
-        if (lowerReply.includes('confirm') || lowerReply.includes('yes') || lowerReply.includes('ok') || lowerReply.includes('sure')) {
-            console.log("[GeminiService] Placeholder classified as: CONFIRM");
-            return 'CONFIRM';
-        } else if (lowerReply.includes('decline') || lowerReply.includes('no') || lowerReply.includes('cancel') || lowerReply.includes('stop')) {
-            console.log("[GeminiService] Placeholder classified as: DECLINE");
-            return 'DECLINE';
-        } else {
-            console.log("[GeminiService] Placeholder classified as: UNCLEAR");
-            return 'UNCLEAR';
-        }
-        // --- End Placeholder Logic ---
+        console.log(`[GeminiService] Classifying reply: "${replyText}", Previous Message: "${sentMessageContent}"`);
 
-        /*
-        // --- Example using fetch (replace with Gemini SDK if preferred) ---
         try {
-            const prompt = `Analyze the following customer reply regarding an order confirmation and classify it strictly as CONFIRM, DECLINE, or UNCLEAR. Only output the classification word.\n\nCustomer Reply: "${replyText}"\n\nClassification:`;
+            const genAI = this.getGenAI();
 
-            const response = await fetch(GEMINI_API_ENDPOINT, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${GEMINI_API_KEY}` // Adjust auth as needed
+            // --- Define Generation Config and Safety Settings ---
+            const generationConfig: GenerationConfig = {
+                maxOutputTokens: 50,
+                temperature: 0.2,
+                topP: 0.95,
+                topK: 64,
+                responseMimeType: "application/json",
+                // *** SIMPLIFIED responseSchema ***
+                responseSchema: {
+                    type: SchemaType.OBJECT, // Top level is object
+                    properties: {
+                        classification: {
+                            type: SchemaType.STRING, 
+                        }
+                    },
+                    required: ["classification"]
                 },
-                body: JSON.stringify({
-                    // Adjust body based on Gemini API requirements
-                    prompt: prompt,
-                    max_tokens: 5,
-                    temperature: 0.2,
-                })
+            };
+
+            
+
+            // --- Get Model with Configuration ---
+            const model = genAI.getGenerativeModel({
+                model: "gemini-2.0-flash",
+                systemInstruction: `You are an AI assistant analyzing customer replies to an order confirmation message sent via WhatsApp. You are provided with the original automated confirmation message and the customer's reply.  Your primary goal is to determine if the customer is **confirming** or **declining** the order based *only* on the meaning of their reply text, WITH the original message in mind to better understand context,
+
+**IMPORTANT: You must understand replies in ANY language and regional dialect.** Customers may respond informally, use slang, emojis, or make typos. Focus on the core intent: are they agreeing to proceed with the order or rejecting it?
+
+Possible classifications:
+- **CONFIRM**: The user expresses agreement to the order. Examples (in various languages): "yes", "ok", "confirm", "sure", "sounds good", "proceed", "sí", "oui", "ja", "va bene","ah", "ayh 3afak", "تمام", "好的", "👍", "✅", etc.
+- **DECLINE**: The user expresses disagreement or desire to cancel. Examples: "no", "cancel", "stop", "don't want it", "decline", "non", "nein", "لا", "不要", "👎", "❌", etc.
+- **UNCLEAR**: The user's reply is ambiguous, asks a question unrelated to confirming/declining (e.g., "when will it ship?"), is irrelevant, contains mixed signals, or is impossible to interpret as a clear confirm/decline.
+
+Respond *only* with a JSON object matching this exact schema:
+\`\`\`json
+{
+  "type": "object",
+  "properties": {
+    "classification": {
+      "type": "string",
+      "enum": ["CONFIRM", "DECLINE", "UNCLEAR"]
+    }
+  },
+  "required": ["classification"]
+}
+\`\`\``,                
+              generationConfig: generationConfig,
             });
 
-            if (!response.ok) {
-                const errorBody = await response.text();
-                console.error(`[GeminiService] API Error ${response.status}: ${errorBody}`);
-                throw new Error(`Gemini API request failed with status ${response.status}`);
+
+            // --- Send Request ---
+            console.log("[GeminiService] Sending request to Gemini API...");
+              const prompt = `WhatsApp Message (Seller): "${sentMessageContent}"\n\nCustomer Reply: "${replyText}"`;
+            console.log(prompt)
+            const result = await model.generateContent(prompt);
+
+            // --- Process Response ---
+            const response = result.response;
+            const responseText = response.text();
+            console.log("[GeminiService] Raw API Response Text:", responseText);
+
+            if (!responseText) {
+                 console.warn("[GeminiService] Received empty response text from API.");
+                 return 'UNCLEAR';
             }
 
-            const result = await response.json();
-            // Parse the actual classification from the Gemini response structure
-            const classification = result?.choices?.[0]?.text?.trim().toUpperCase(); // Example structure
+            let parsedResponse: Partial<ClassificationResponse>;
+            try {
+                parsedResponse = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error("[GeminiService] Failed to parse JSON response:", parseError);
+                console.error("[GeminiService] Raw text was:", responseText);
+                return 'UNCLEAR';
+            }
 
-            if (classification === 'CONFIRM' || classification === 'DECLINE') {
-                console.log(`[GeminiService] Classified as: ${classification}`);
-                return classification;
+            // *** VALIDATE the received string against our allowed values ***
+            if (typeof parsedResponse === 'object' &&
+                parsedResponse !== null &&
+                typeof parsedResponse.classification === 'string' && // Check if it's a string
+                VALID_CLASSIFICATIONS.includes(parsedResponse.classification as ReplyClassification)) // Check if it's one of the allowed enums
+            {
+                const finalClassification = parsedResponse.classification as ReplyClassification;
+                console.log(`[GeminiService] Classified as: ${finalClassification}`);
+                return finalClassification;
             } else {
-                 console.warn(`[GeminiService] Received unclear classification: ${classification}`);
-                 return 'UNCLEAR';
+                console.warn("[GeminiService] Received JSON does not match expected schema or value:", parsedResponse);
+                return 'UNCLEAR';
             }
 
         } catch (error: any) {
             console.error("[GeminiService] Error calling Gemini API:", error);
-            throw new Error(`Failed to classify reply using AI: ${error.message}`);
+            if (error.message?.includes("blocked") || error.message?.includes("Safety")) {
+                 console.warn("[GeminiService] Request may have been blocked due to safety settings.");
+            }
+            return 'UNCLEAR';
         }
-        */
     }
 }

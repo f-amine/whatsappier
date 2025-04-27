@@ -44,16 +44,13 @@ export const AutomationConfigForm: React.FC<AutomationConfigFormProps> = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
             {/* Render the specific form component */}
-            {/* This now correctly exists within the Form context */}
             <SpecificFormComponent form={form} templateDefinitionId={templateDefinitionId} />
 
-            {/* Display general form errors if any */}
             {form.formState.errors.root && (
                <p className="text-sm font-medium text-destructive">{form.formState.errors.root.message}</p>
             )}
 
             <div className="flex justify-end">
-               {/* Use Shadcn Button */}
                <Button type="submit" disabled={isSubmitting}>
                  {isSubmitting && (
                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -62,7 +59,7 @@ export const AutomationConfigForm: React.FC<AutomationConfigFormProps> = ({
                </Button>
             </div>
           </form>
-        </Form> {/* ***** END Form wrapper ***** */}
+        </Form>
       </CardContent>
     </Card>
   );
