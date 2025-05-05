@@ -5,7 +5,7 @@ import {
     LightfunnelsWebhookEventPayload,
     LightfunnelsOrderConfirmedNode,
     LightFunnelsService,
-    UpdateOrderInput // Make sure have this one
+    UpdateOrderInput
 } from '../helpers/lightfunnels';
 import { z } from 'zod';
 import { LfOrderToWhatsappConfigSchema } from '../templates/definitions/lf-order-to-whatsapp';
@@ -133,15 +133,70 @@ export async function executeLfOrderToWhatsapp(
                             config.googleSheetsConnectionId,
                             config.googleSheetId || '',
                             {
+                                // Basic order info
                                 orderNumber,
+                                orderId: orderData.id,
+                                internalId: orderData._id,
+                                createdAt: orderData.created_at,
+                                cancelledAt: orderData.cancelled_at,
+                                
+                                // Customer info
                                 customerName,
                                 customerEmail: orderData.email,
                                 customerPhone,
+                                customerId: orderData.customer?.id || null,
+                                customerLocation: orderData.customer?.location || null,
+                                
+                                // Financial information
+                                currency: orderData.currency || 'USD',
+                                subtotal: String(orderData.subtotal || 0),
+                                shipping: String(orderData.shipping || 0),
+                                discountValue: String(orderData.discount_value || 0),
                                 totalAmount,
-                                status: 'CONFIRMED',
+                                refundedAmount: String(orderData.refunded_amount || 0),
+                                paidByCustomer: String(orderData.paid_by_customer || 0),
+                                netPayment: String(orderData.net_payment || 0),
+                                originalTotal: String(orderData.original_total || 0),
+                                refundable: String(orderData.refundable || 0),
+                                
+                                // Addresses
+                                shippingAddress: orderData.shipping_address,
+                                shippingCountry: orderData.shipping_address?.country || null,
+                                shippingCity: orderData.shipping_address?.city || null,
+                                shippingZip: orderData.shipping_address?.zip || null,
+                                shippingState: orderData.shipping_address?.state || null,
+                                
+                                billingAddress: orderData.billing_address,
+                                billingCountry: orderData.billing_address?.country || null,
+                                billingCity: orderData.billing_address?.city || null,
+                                billingZip: orderData.billing_address?.zip || null,
+                                billingState: orderData.billing_address?.state || null,
+                                
+                                // Source information
+                                ipAddress: orderData.client_details?.ip || null,
+                                funnelId: orderData.funnel_id || null,
+                                storeId: orderData.store_id || null,
+                                
+                                // Payment info
+                                paymentMethod: orderData.payments,
+                                financialStatus: orderData.financial_status || 'unknown',
+                                
+                                // Order status
+                                fulfillmentStatus: orderData.fulfillment_status || 'unfulfilled',
+                                tags: (orderData.tags || []).join(', '),
+                                status: 'CONFIRMED', // Auto-confirmed
+                                
+                                // Items information
+                                itemCount: String(orderData.items?.length || 0),
+                                itemsSummary: orderData.items,
+                                
+                                // Date of automation run
                                 date: new Date().toISOString()
                             },
-                            config
+                            {
+                                ...config,
+                                automationId: automation.id
+                            }
                         );
                         metadata.googleSheetsUpdated = true;
                     }
@@ -311,22 +366,12 @@ export async function handleLfOrderReply(
     }
 }
 
-interface OrderSheetData {
-    orderNumber: string;
-    customerName: string;
-    customerEmail: string;
-    customerPhone: string;
-    totalAmount: string;
-    status: string;
-    date: string;
-    replyText?: string;
-}
 
 async function updateGoogleSheet(
     connectionId: string,
     sheetId: string,
-    data: OrderSheetData,
-    config?: any // Add config parameter
+    data: Record<string, any>,
+    config?: any
 ): Promise<void> {
     try {
         const connection = await prisma.connection.findUnique({
@@ -339,82 +384,60 @@ async function updateGoogleSheet(
         
         const sheetsService = await GoogleSheetsService.fromConnection(connection);
         
-        // Handle new sheet creation if needed
         let actualSheetId = sheetId;
-        let isNewSheet = false;
         
-        if (config?.createNewSheet && config?.customSheetName) {
-            console.log(`Creating new sheet: ${config.customSheetName}`);
-            const newSheet = await sheetsService.createNewSpreadsheet(config.customSheetName);
-            actualSheetId = newSheet.id;
-            isNewSheet = true;
+        if (!actualSheetId && config?.createNewSheet && config?.customSheetName) {
+            console.log(`Finding or creating spreadsheet: ${config.customSheetName}`);
+            try {
+                const spreadsheet = await sheetsService.findOrCreateSpreadsheet(config.customSheetName);
+                actualSheetId = spreadsheet.id;
+                
+                if (config.automationId) {
+                    console.log(`Saving spreadsheet ID ${spreadsheet.id} to automation ${config.automationId}`);
+                    await prisma.automation.update({
+                        where: { id: config.automationId },
+                        data: {
+                            config: {
+                                ...(config as any),
+                                googleSheetId: spreadsheet.id,
+                                createNewSheet: false 
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error(`Error finding/creating spreadsheet: ${error}`);
+                throw new Error(`Failed to find or create spreadsheet: ${error}`);
+            }
         }
         
-        // Get column configuration or use defaults
-        const columnConfig = config?.sheetColumns || [
-            { field: 'date', enabled: true },
-            { field: 'orderNumber', enabled: true },
-            { field: 'customerName', enabled: true },
-            { field: 'customerEmail', enabled: true },
-            { field: 'customerPhone', enabled: true },
-            { field: 'totalAmount', enabled: true },
-            { field: 'status', enabled: true },
-            { field: 'replyText', enabled: true }
-        ];
-        
-        // Build headers and values based on enabled columns
-        const headers: string[] = [];
-        const rowValues: string[] = [];
-        
-        // Map of field names to display names for headers
-        const fieldDisplayNames: Record<string, string> = {
-            date: 'Date',
-            orderNumber: 'Order Number',
-            customerName: 'Customer Name',
-            customerEmail: 'Customer Email',
-            customerPhone: 'Customer Phone',
-            totalAmount: 'Total Amount',
-            status: 'Status',
-            replyText: 'Customer Reply'
-        };
-        
-        // Build row data based on enabled columns
-        columnConfig.forEach(column => {
-            if (column.enabled) {
-                const fieldName = column.field as keyof OrderSheetData;
-                const fieldValue = data[fieldName] || '';
-                headers.push(fieldDisplayNames[fieldName] || fieldName);
-                rowValues.push(fieldValue);
-            }
-        });
-        
-        // Get sheet name from config or use default
         const sheetName = config?.sheetName || 'Sheet1';
         
-        // Check if the sheet has any data first
-        try {
-            const existingData = await sheetsService.getSheetData(actualSheetId, sheetName);
-            const isEmpty = !existingData || existingData.length === 0;
-            
-            if (isEmpty) {
-                // Sheet is empty, add headers and data
-                console.log(`Adding headers and data to empty sheet ${sheetName} in spreadsheet ${actualSheetId}`);
-                const values = [headers, rowValues];
-                await sheetsService.addRowToSheet(actualSheetId, sheetName, values, false);
-            } else {
-                // Sheet has data, just add the new row
-                console.log(`Adding data to existing sheet ${sheetName} in spreadsheet ${actualSheetId}`);
-                await sheetsService.addRowToSheet(actualSheetId, sheetName, [rowValues], false);
-            }
-        } catch (error) {
-            // If checking existing data fails, try to add headers and data anyway
-            console.log(`Error checking sheet data, attempting to add headers and data: ${error}`);
-            const values = [headers, rowValues];
-            await sheetsService.addRowToSheet(actualSheetId, sheetName, values, true);
+        const columnConfig = config?.sheetColumns || [];
+        const enabledColumns = columnConfig.filter((col: any) => col.enabled);
+        
+        let filteredData: Record<string, any> = {};
+        
+        if (enabledColumns.length > 0) {
+            enabledColumns.forEach((column: any) => {
+                const fieldName = column.field;
+                if (data[fieldName] !== undefined) {
+                    filteredData[fieldName] = data[fieldName];
+                }
+            });
+        } else {
+            filteredData = data;
         }
+        
+        await sheetsService.updateSheet(actualSheetId, filteredData, {
+            sheetName,
+            createIfNotExist: true,
+            useHeadersFromData: true,
+            formatHeaders: true
+        });
         
     } catch (error: any) {
         console.error('Error updating Google Sheet:', error);
         throw new Error(`Failed to update Google Sheet: ${error.message}`);
     }
-} 
+}

@@ -68,11 +68,13 @@ model User {
   accounts Account[]
   sessions Session[]
 
-  connections Connection[]
-  templates   Template[]
-  analytics   Analytics[]
-  devices     Device[]
-  automations Automation[]
+  connections     Connection[]
+  templates       Template[]
+  analytics       Analytics[]
+  devices         Device[]
+  automations     Automation[]
+  OTP             OTP[]
+  OTPVerification OTPVerification[]
 
   @@map(name: "users")
 }
@@ -114,38 +116,38 @@ model Device {
 }
 
 model Automation {
-  id             String      @id @default(cuid())
-  userId         String
-  user           User        @relation(fields: [userId], references: [id])
-  name           String
-  description    String?
+  id          String  @id @default(cuid())
+  userId      String
+  user        User    @relation(fields: [userId], references: [id])
+  name        String
+  description String?
 
   // --- Link to the Template Definition ---
   templateDefinitionId String // Stores the ID from the template registry (e.g., 'lf-order-to-whatsapp')
 
   // --- Configuration specific to the chosen template ---
-  config         Json        // Stores the validated user input (e.g., { funnelId: 'xyz', ... })
+  config Json // Stores the validated user input (e.g., { funnelId: 'xyz', ... })
 
   // --- Resource Links (optional, might be derived from config or stored for quick access) ---
-  connectionId   String?     // Link to the primary connection if applicable
-  connection     Connection? @relation(fields: [connectionId], references: [id])
-  templateId     String?     // Link to the message template (Prisma Template model) if applicable
-  template       Template?   @relation(fields: [templateId], references: [id])
-  deviceId       String?     // Link to the WhatsApp device if applicable
-  device         Device?     @relation(fields: [deviceId], references: [id])
+  connectionId String? // Link to the primary connection if applicable
+  connection   Connection? @relation(fields: [connectionId], references: [id])
+  templateId   String? // Link to the message template (Prisma Template model) if applicable
+  template     Template?   @relation(fields: [templateId], references: [id])
+  deviceId     String? // Link to the WhatsApp device if applicable
+  device       Device?     @relation(fields: [deviceId], references: [id])
 
   // --- Trigger Info ---
-  trigger        TriggerType // The general Prisma trigger type (e.g., WEBHOOK)
-  triggerConfig  Json        // Store specific trigger details (e.g., { type: 'lf_order_confirmed', webhookId: 'wh_123' })
+  trigger       TriggerType // The general Prisma trigger type (e.g., WEBHOOK)
+  triggerConfig Json // Store specific trigger details (e.g., { type: 'lf_order_confirmed', webhookId: 'wh_123' })
 
   // --- Execution State ---
-  isActive       Boolean     @default(true)
-  metadata       Json?       // General metadata (last run, errors, etc.)
-  runs           Run[]
+  isActive Boolean @default(true)
+  metadata Json? // General metadata (last run, errors, etc.)
+  runs     Run[]
 
   // --- Timestamps ---
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // --- Indexes ---
   @@index([userId])
@@ -171,7 +173,6 @@ model Connection {
   deviceId    String?
   Automation  Automation[]
   orders      Order[]
-  checkouts   Checkout[]
 
   @@index([userId, platform])
 }
@@ -233,9 +234,11 @@ model Run {
   Broadcast      Broadcast?  @relation(fields: [broadcastId], references: [id])
   broadcastId    String?
   FailedRun      FailedRun[]
-  phoneNumber    String?     // New: Store the normalized phone number the initial message was sent TO
-  aiResult       Json?       // New: Store the classification from AI
+  phoneNumber    String? 
+  aiResult       Json?
   metadata       Json?
+  createdAt      DateTime    @default(now()) 
+  updatedAt      DateTime    @updatedAt
 
   // Indexes for performance
   @@index([userId])
@@ -307,19 +310,37 @@ model Order {
   @@index([status])
 }
 
-model Checkout {
-  id            String         @id @default(cuid())
-  connectionId  String
-  connection    Connection     @relation(fields: [connectionId], references: [id])
-  customerName  String
-  customerEmail String
-  status        CheckoutStatus @default(ABANDONED)
-  metadata      Json?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+model OTP {
+  id          String    @id @default(cuid())
+  userId      String // Make sure this exists and is indexed
+  user        User?     @relation(fields: [userId], references: [id]) // Optional relation
+  code        String
+  phoneNumber String
+  email       String?
+  expiresAt   DateTime
+  verifiedAt  DateTime?
+  type        String    @default("GENERIC")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  @@index([connectionId])
-  @@index([status])
+  OTPVerification OTPVerification[]
+
+  @@index([userId]) // Ensure index on userId
+  @@index([phoneNumber, code, expiresAt])
+}
+
+model OTPVerification {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User?    @relation(fields: [userId], references: [id])
+  otpId      String
+  otp        OTP      @relation(fields: [otpId], references: [id], onDelete: Cascade)
+  source     String
+  metadata   Json?
+  verifiedAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([otpId])
 }
 
 enum OrderStatus {
@@ -327,12 +348,6 @@ enum OrderStatus {
   CONFIRMED
   NOT_CONFIRMED
   IN_PROGRESS
-}
-
-enum CheckoutStatus {
-  COMPLETED
-  ABANDONED
-  RECOVERED
 }
 
 enum Platform {
@@ -354,8 +369,10 @@ enum RunStatus {
   SUCCEEDED
   FAILED
   CANCELLED
-  WAITING_REPLY      
-  PROCESSING_REPLY   
+  WAITING_REPLY
+  PROCESSING_REPLY
+  PENDING_DELAY
+  PROCESSING_RESUME
 }
 
 enum FailedRunStatus {
@@ -392,6 +409,7 @@ enum TriggerType {
   SCHEDULE
   API
   EVENT
+  SCRIPT_TAG
 }
 
 enum PaddleSubscriptionStatus {

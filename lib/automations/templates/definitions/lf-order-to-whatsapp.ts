@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { Platform, TriggerType as PrismaTriggerType } from '@prisma/client';
-import { MessageSquare, ShoppingCart } from 'lucide-react'; // Example icons
+import { ShoppingCart } from 'lucide-react';
 import { LfOrderToWhatsappForm } from '@/components/pages/automations/config-forms/LfOrderToWhatsappForm';
 import { AppActionType, AppTriggerType, AutomationTemplateDefinition } from '@/types/automations-templates';
+import { ORDER_SHEET_COLUMNS, convertColumnsToFormValues } from '@/lib/automations/helpers/sheets-columns';
 
 export const LfOrderToWhatsappConfigSchema = z.object({
   lightfunnelsConnectionId: z.string().min(1, { message: "Lightfunnels connection is required." }),
@@ -13,24 +14,16 @@ export const LfOrderToWhatsappConfigSchema = z.object({
   syncToGoogleSheets: z.boolean().default(false),
   googleSheetsConnectionId: z.string().optional(),
   googleSheetId: z.string().optional(),
-  createNewSheet: z.boolean().default(false),
+  createNewSheet: z.boolean().optional().default(false),
   customSheetName: z.string().optional(),
+  sheetName: z.string().optional(),
   sheetColumns: z.array(z.object({
     field: z.string(),
-    enabled: z.boolean().default(true)
-  })).optional().default([
-    { field: 'date', enabled: true },
-    { field: 'orderNumber', enabled: true },
-    { field: 'customerName', enabled: true },
-    { field: 'customerEmail', enabled: true },
-    { field: 'customerPhone', enabled: true },
-    { field: 'totalAmount', enabled: true },
-    { field: 'status', enabled: true },
-    { field: 'replyText', enabled: true }
-  ]),
+    enabled: z.boolean().default(true),
+    category: z.string().optional()
+  })).optional().default(convertColumnsToFormValues(ORDER_SHEET_COLUMNS)),
 });
 
-// Define the template
 export const lfOrderToWhatsappTemplate: AutomationTemplateDefinition<typeof LfOrderToWhatsappConfigSchema> = {
   id: 'lf-order-to-whatsapp',
   name: 'Send WhatsApp on Lightfunnels Order',

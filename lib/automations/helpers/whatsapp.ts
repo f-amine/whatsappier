@@ -170,59 +170,50 @@ export class WhatsAppService {
         data?: any,
         requiresInstanceInPath: boolean = true
     ): Promise<any> {
-        // Construct URL based on whether instanceName is required in the path
-        const urlPath = requiresInstanceInPath
-            ? `${endpoint}/${this.instanceName}`
-            : endpoint;
-        const url = `${this.baseUrl}${urlPath}`;
+      const urlPath = requiresInstanceInPath
+          ? `${endpoint}/${this.instanceName}`
+          : endpoint;
+      const url = `${this.baseUrl}${urlPath}`;
 
-        if (requiresInstanceInPath && !this.instanceName) {
-            throw new Error(`WhatsAppService: Instance name is required for endpoint '${endpoint}' but was not provided.`);
-        }
+      if (requiresInstanceInPath && !this.instanceName) {
+          throw new Error(`WhatsAppService: Instance name is required for endpoint '${endpoint}' but was not provided.`);
+      }
 
-        console.log(`[WhatsAppService] Request: ${method} ${url}`); // Log request
+      console.log(`[WhatsAppService] Request: ${method} ${url}`); 
 
-        try {
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    "Content-Type": "application/json",
-                    apikey: this.apiKey, // Use the global API key for authentication
-                },
-                body: data ? JSON.stringify(data) : undefined,
-            });
+          const response = await fetch(url, {
+              method,
+              headers: {
+                  "Content-Type": "application/json",
+                  apikey: this.apiKey,
+              },
+              body: data ? JSON.stringify(data) : undefined,
+          });
 
-            if (!response.ok) {
-                let errorBody: any;
-                try {
-                    errorBody = await response.json();
-                    console.error(`[WhatsAppService] API Error Response (${response.status}):`, errorBody);
-                    console.dir(errorBody,{depth:null})
-                } catch (e) {
-                    errorBody = await response.text();
-                    console.error(`[WhatsAppService] API Error Response (${response.status}, non-JSON):`, errorBody);
-                }
-                const error: WhatsAppError = new Error(`WhatsApp API Error (${response.status}): ${typeof errorBody === 'string' ? errorBody : errorBody?.message || errorBody?.error || 'Unknown error'}`);
-                error.status = response.status;
-                error.response = errorBody;
-                throw error;
-            }
+          if (!response.ok) {
+              let errorBody: any;
+              try {
+                  errorBody = await response.json();
+                  console.error(`[WhatsAppService] API Error Response (${response.status}):`, errorBody);
+                  console.dir(errorBody,{depth:null})
+              } catch (e) {
+                  errorBody = await response.text();
+                  console.error(`[WhatsAppService] API Error Response (${response.status}, non-JSON):`, errorBody);
+              }
+              const error: WhatsAppError = new Error(`WhatsApp API Error (${response.status}): ${typeof errorBody === 'string' ? errorBody : errorBody?.message || errorBody?.error || 'Unknown error'}`);
+              error.status = response.status;
+              error.response = errorBody;
+              throw error;
+          }
 
-            // Handle potential empty responses for success codes like 200/204
-            if (response.status === 204) {
-                 console.log(`[WhatsAppService] Response: ${response.status} No Content`);
-                 return { success: true }; // Return success indicator for No Content
-            }
+          if (response.status === 204) {
+               console.log(`[WhatsAppService] Response: ${response.status} No Content`);
+               return { success: true };
+          }
 
-            const responseData = await response.json();
-            // console.log(`[WhatsAppService] Response: ${response.status}`, responseData); // Log success response
-            return responseData;
-
-        } catch (error) {
-            // Log error caught during fetch or processing
-            console.error(`[WhatsAppService] Fetch/Processing Error for ${method} ${url}:`, error);
-            throw error; // Re-throw the error
-        }
+          const responseData = await response.json();
+          console.log(`[WhatsAppService] Response: ${response.status}`, responseData);
+          return responseData;
     }
 
     

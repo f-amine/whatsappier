@@ -312,6 +312,403 @@ export class GoogleSheetsService {
       throw new Error(`Failed to add row to Google Sheet: ${error.message}`);
     }
   }
+
+  async getSpreadsheetInfo(spreadsheetId: string): Promise<any> {
+    try {
+      // Ensure token is fresh
+      await this.refreshTokenIfNeeded();
+      
+      console.log(`Getting spreadsheet info for: ${spreadsheetId}`);
+      
+      // Get spreadsheet information including sheets
+      const response = await this.sheetsClient.spreadsheets.get({
+        spreadsheetId,
+        fields: 'sheets.properties'
+      });
+      
+      return response.data;
+    } catch (error: any) {
+      console.error('Error getting spreadsheet info:', error);
+      
+      // Log detailed error information
+      if (error.response) {
+        console.error('Response error data:', error.response.data);
+        console.error('Response error status:', error.response.status);
+      }
+      
+      throw new Error(`Failed to get spreadsheet info: ${error.message}`);
+    }
+  }
+
+  async createSheet(spreadsheetId: string, sheetName: string): Promise<void> {
+    try {
+      // Ensure token is fresh
+      await this.refreshTokenIfNeeded();
+      
+      console.log(`Creating new sheet "${sheetName}" in spreadsheet: ${spreadsheetId}`);
+      
+      // Add a new sheet to the spreadsheet
+      await this.sheetsClient.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: [
+            {
+              addSheet: {
+                properties: {
+                  title: sheetName,
+                  gridProperties: {
+                    rowCount: 1000,
+                    columnCount: 26
+                  }
+                }
+              }
+            }
+          ]
+        }
+      });
+      
+      console.log(`Created new sheet "${sheetName}" successfully`);
+    } catch (error: any) {
+      console.error('Error creating sheet:', error);
+      
+      // Log detailed error information
+      if (error.response) {
+        console.error('Response error data:', error.response.data);
+        console.error('Response error status:', error.response.status);
+      }
+      
+      throw new Error(`Failed to create sheet: ${error.message}`);
+    }
+  }
+
+  async insertRowAt(
+    spreadsheetId: string,
+    sheetName: string,
+    values: string[],
+    rowIndex: number
+  ): Promise<void> {
+    try {
+      // Ensure token is fresh
+      await this.refreshTokenIfNeeded();
+      
+      console.log(`Inserting row at position ${rowIndex} in sheet "${sheetName}"`);
+      
+      // First, create space for the new row by inserting a row
+      await this.sheetsClient.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: [
+            {
+              insertDimension: {
+                range: {
+                  sheetId: await this.getSheetId(spreadsheetId, sheetName),
+                  dimension: 'ROWS',
+                  startIndex: rowIndex - 1, // 0-based index
+                  endIndex: rowIndex // exclusive
+                }
+              }
+            }
+          ]
+        }
+      });
+      
+      // Then, update the values in the newly inserted row
+      await this.sheetsClient.spreadsheets.values.update({
+        spreadsheetId,
+        range: `${sheetName}!A${rowIndex}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: {
+          values: [values]
+        }
+      });
+      
+      console.log(`Row inserted successfully at position ${rowIndex}`);
+    } catch (error: any) {
+      console.error('Error inserting row:', error);
+      
+      // Log detailed error information
+      if (error.response) {
+        console.error('Response error data:', error.response.data);
+        console.error('Response error status:', error.response.status);
+      }
+      
+      throw new Error(`Failed to insert row: ${error.message}`);
+    }
+  }
+
+  async formatHeadersAsBold(
+    spreadsheetId: string,
+    sheetName: string
+  ): Promise<void> {
+    try {
+      // Ensure token is fresh
+      await this.refreshTokenIfNeeded();
+      
+      console.log(`Formatting headers as bold in sheet "${sheetName}"`);
+      
+      // Get the sheet ID
+      const sheetId = await this.getSheetId(spreadsheetId, sheetName);
+      
+      // Apply bold formatting to the first row
+      await this.sheetsClient.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: [
+            {
+              repeatCell: {
+                range: {
+                  sheetId: sheetId,
+                  startRowIndex: 0,
+                  endRowIndex: 1, // Only the first row
+                  startColumnIndex: 0,
+                  endColumnIndex: 100 // A large number to cover all columns
+                },
+                cell: {
+                  userEnteredFormat: {
+                    textFormat: {
+                      bold: true
+                    }
+                  }
+                },
+                fields: 'userEnteredFormat.textFormat.bold'
+              }
+            }
+          ]
+        }
+      });
+      
+      console.log(`Headers formatted as bold successfully`);
+    } catch (error: any) {
+      console.error('Error formatting headers as bold:', error);
+      
+      // Log detailed error information
+      if (error.response) {
+        console.error('Response error data:', error.response.data);
+        console.error('Response error status:', error.response.status);
+      }
+      
+      throw new Error(`Failed to format headers as bold: ${error.message}`);
+    }
+  }
+
+  private async getSheetId(spreadsheetId: string, sheetName: string): Promise<number> {
+    const spreadsheetInfo = await this.getSpreadsheetInfo(spreadsheetId);
+    
+    const sheet = spreadsheetInfo.sheets.find((s: any) => 
+      s.properties.title === sheetName
+    );
+    
+    if (!sheet) {
+      throw new Error(`Sheet "${sheetName}" not found in spreadsheet`);
+    }
+    
+    return sheet.properties.sheetId;
+  }
+
+  /**
+   * Generic method to update a Google Sheet with any data structure
+   * @param spreadsheetId - The ID of the spreadsheet to update
+   * @param data - Object containing the data to add to the sheet
+   * @param options - Configuration options for updating the sheet
+   * @returns 
+   */
+  async updateSheet(
+    spreadsheetId: string,
+    data: Record<string, any>,
+    options: {
+      sheetName?: string;
+      createIfNotExist?: boolean;
+      useHeadersFromData?: boolean;
+      customHeaders?: string[];
+      formatHeaders?: boolean;
+    } = {}
+  ): Promise<void> {
+    try {
+      // Ensure token is fresh
+      await this.refreshTokenIfNeeded();
+      
+      // Set default options
+      const sheetName = options.sheetName || 'Sheet1';
+      const createIfNotExist = options.createIfNotExist !== false;
+      const formatHeaders = options.formatHeaders !== false;
+      
+      console.log(`Updating sheet "${sheetName}" in spreadsheet: ${spreadsheetId}`);
+      
+      // Check if the spreadsheet exists
+      const spreadsheetInfo = await this.getSpreadsheetInfo(spreadsheetId);
+      
+      // Check if the specified sheet exists
+      const sheetExists = spreadsheetInfo.sheets.some((sheet: any) => 
+        sheet.properties?.title === sheetName
+      );
+      
+      // Create the sheet if it doesn't exist and createIfNotExist is true
+      if (!sheetExists) {
+        if (!createIfNotExist) {
+          throw new Error(`Sheet "${sheetName}" doesn't exist in spreadsheet`);
+        }
+        
+        console.log(`Sheet "${sheetName}" doesn't exist, creating it...`);
+        await this.createSheet(spreadsheetId, sheetName);
+      }
+      
+      // Get existing data to check if headers exist
+      const existingData = await this.getSheetData(spreadsheetId, sheetName);
+      const isEmpty = !existingData || existingData.length === 0;
+      
+      // Determine headers (column names)
+      let headers: string[] = [];
+      
+      if (options.customHeaders && options.customHeaders.length > 0) {
+        // Use custom headers if provided
+        headers = options.customHeaders;
+      } else if (options.useHeadersFromData) {
+        // Use all keys from the data object as headers
+        headers = Object.keys(data);
+      } else if (!isEmpty) {
+        // Use existing headers from the sheet
+        headers = existingData[0] || [];
+      } else {
+        // Default to using all keys from the data object if sheet is empty
+        headers = Object.keys(data);
+      }
+      
+      // Prepare row values based on headers
+      const rowValues = headers.map(header => {
+        const value = data[header];
+        
+        // Handle different types of values
+        if (value === null || value === undefined) {
+          return '';
+        } else if (typeof value === 'object') {
+          return JSON.stringify(value);
+        } else {
+          return String(value);
+        }
+      });
+      
+      // Update the sheet
+      if (isEmpty) {
+        // Sheet is empty, add headers and data
+        console.log(`Adding headers and data to empty sheet ${sheetName}`);
+        const values = [headers, rowValues];
+        await this.addRowToSheet(spreadsheetId, sheetName, values, true);
+        
+        // Format headers as bold if requested
+        if (formatHeaders) {
+          await this.formatHeadersAsBold(spreadsheetId, sheetName);
+        }
+      } else {
+        // Check if headers match
+        const existingHeaders = existingData[0] || [];
+        const headersMatch = headers.every(header => existingHeaders.includes(header));
+        
+        if (!headersMatch) {
+          console.log(`Headers don't match, updating sheet structure`);
+          
+          // Create a new set of headers that includes both existing and new ones
+          const combinedHeaders = [...new Set([...existingHeaders, ...headers])];
+          
+          // Update the headers row
+          await this.sheetsClient.spreadsheets.values.update({
+            spreadsheetId,
+            range: `${sheetName}!A1`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: {
+              values: [combinedHeaders]
+            }
+          });
+          
+          // Format headers as bold if requested
+          if (formatHeaders) {
+            await this.formatHeadersAsBold(spreadsheetId, sheetName);
+          }
+          
+          // Prepare row values based on new combined headers
+          const newRowValues = combinedHeaders.map(header => {
+            const value = data[header];
+            
+            // Handle different types of values
+            if (value === null || value === undefined) {
+              return '';
+            } else if (typeof value === 'object') {
+              return JSON.stringify(value);
+            } else {
+              return String(value);
+            }
+          });
+          
+          // Append the data as a new row
+          await this.sheetsClient.spreadsheets.values.append({
+            spreadsheetId,
+            range: `${sheetName}!A2`,
+            valueInputOption: 'USER_ENTERED',
+            insertDataOption: 'INSERT_ROWS',
+            requestBody: {
+              values: [newRowValues]
+            }
+          });
+        } else {
+          // Headers already match, just append the data
+          console.log(`Headers match, appending data to sheet ${sheetName}`);
+          await this.sheetsClient.spreadsheets.values.append({
+            spreadsheetId,
+            range: `${sheetName}!A${existingData.length + 1}`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: {
+              values: [rowValues]
+            }
+          });
+        }
+      }
+      
+      console.log(`Sheet "${sheetName}" updated successfully`);
+    } catch (error: any) {
+      console.error('Error updating sheet:', error);
+      
+      // Log detailed error information
+      if (error.response) {
+        console.error('Response error data:', error.response.data);
+        console.error('Response error status:', error.response.status);
+      }
+      
+      throw new Error(`Failed to update sheet: ${error.message}`);
+    }
+  }
+
+  /**
+   * Find or create a spreadsheet with the given name
+   * @param name - The name of the spreadsheet to find or create
+   * @returns Information about the found or created spreadsheet
+   */
+  async findOrCreateSpreadsheet(name: string): Promise<GoogleSheetInfo> {
+    try {
+      // Ensure token is fresh
+      await this.refreshTokenIfNeeded();
+      
+      console.log(`Looking for spreadsheet with name: ${name}`);
+      
+      // First check if a spreadsheet with this name already exists
+      const existingSpreadsheets = await this.getSpreadsheets();
+      
+      // Do case-insensitive comparison to be more forgiving with names
+      const matchingSpreadsheet = existingSpreadsheets.find(
+        sheet => sheet.name.toLowerCase() === name.toLowerCase()
+      );
+      
+      if (matchingSpreadsheet) {
+        console.log(`Found existing spreadsheet with name: ${name}, ID: ${matchingSpreadsheet.id}`);
+        return matchingSpreadsheet;
+      }
+      
+      // If no matching spreadsheet was found, create a new one
+      console.log(`No existing spreadsheet found with name: ${name}. Creating new.`);
+      return await this.createNewSpreadsheet(name);
+    } catch (error: any) {
+      console.error('Error finding or creating spreadsheet:', error);
+      throw new Error(`Failed to find or create spreadsheet: ${error.message}`);
+    }
+  }
 }
 
 export async function getGoogleSheets(
@@ -331,4 +728,4 @@ export async function getGoogleSheets(
 
   const sheetsService = await GoogleSheetsService.fromConnection(connection);
   return sheetsService.getSpreadsheets();
-} 
+}

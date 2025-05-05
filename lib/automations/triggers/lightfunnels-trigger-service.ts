@@ -1,7 +1,6 @@
 import { Platform, Connection, Prisma } from '@prisma/client';
 import { LightFunnelsService, WebhookType, WebhookVersion } from '../helpers/lightfunnels'; // Your LF API helper
 import { TriggerSetupService, TriggerSetupResult, TriggerCleanupResult } from './types';
-import { env } from '@/env.mjs'; // For WEBHOOKS_URL
 import { AppTriggerType } from '@/types/automations-templates';
 
 export class LightfunnelsTriggerService implements TriggerSetupService {
@@ -9,6 +8,7 @@ export class LightfunnelsTriggerService implements TriggerSetupService {
   canHandle(platform: Platform, triggerType: AppTriggerType): boolean {
     return platform === Platform.LIGHTFUNNELS &&
            (triggerType === AppTriggerType.LIGHTFUNNELS_ORDER_CONFIRMED ||
+            triggerType === AppTriggerType.LIGHTFUNNELS_CHECKOUT_CREATED||
             triggerType === AppTriggerType.LIGHTFUNNELS_ORDER_FULFILLED); 
   }
 
@@ -39,6 +39,9 @@ export class LightfunnelsTriggerService implements TriggerSetupService {
       case AppTriggerType.LIGHTFUNNELS_ORDER_FULFILLED:
         lfWebhookType = WebhookType.ORDER_FULFILLED;
         break;
+      case AppTriggerType.LIGHTFUNNELS_CHECKOUT_CREATED:
+        lfWebhookType = WebhookType.CHECKOUT_CREATED
+      
       // Add mappings for other LF triggers you support
       default:
         throw new Error(`Unsupported Lightfunnels trigger type for setup: ${triggerType}`);
@@ -48,7 +51,6 @@ export class LightfunnelsTriggerService implements TriggerSetupService {
     const webhookUrl = `${webhookUrlBase}/${automationId}`;
     console.log(`[LightfunnelsTriggerService] Registering webhook URL: ${webhookUrl} for type ${lfWebhookType}`);
 
-    // 4. Create the Webhook via LF API
     try {
       const createdWebhook = await lfService.createWebhook({
         type: lfWebhookType,
@@ -89,28 +91,18 @@ export class LightfunnelsTriggerService implements TriggerSetupService {
 
     if (!connection || connection.platform !== Platform.LIGHTFUNNELS) {
       console.warn(`[LightfunnelsTriggerService] Connection missing or not Lightfunnels for automation ${automationId}. Cannot delete webhook ${externalWebhookId}.`);
-      // Decide if this should be an error or just a warning
       return { success: false, message: "Connection details missing or invalid." };
     }
 
-    // 1. Get Credentials
     const { accessToken } = connection.credentials as { accessToken: string };
     if (!accessToken) {
         console.warn(`[LightfunnelsTriggerService] Access token missing for connection ${connection.id}. Cannot delete webhook ${externalWebhookId}.`);
         return { success: false, message: "Access token missing." };
     }
     const lfService = new LightFunnelsService(accessToken);
-
-    // 2. Delete the Webhook via LF API
-    try {
-      console.log(`[LightfunnelsTriggerService] Deleting webhook ${externalWebhookId}`);
-      await lfService.deleteWebhook(externalWebhookId);
-      console.log(`[LightfunnelsTriggerService] Successfully deleted webhook ${externalWebhookId}`);
-      return { success: true };
-    } catch (error: any) {
-      console.error(`[LightfunnelsTriggerService] Failed to delete webhook ${externalWebhookId} for automation ${automationId}:`, error);
-      // Log the error but maybe don't block DB deletion
-      return { success: false, message: `Failed to delete Lightfunnels webhook: ${error.message || 'Unknown API error'}` };
-    }
+    console.log(`[LightfunnelsTriggerService] Deleting webhook ${externalWebhookId}`);
+    await lfService.deleteWebhook(externalWebhookId);
+    console.log(`[LightfunnelsTriggerService] Successfully deleted webhook ${externalWebhookId}`);
+    return { success: true };
   }
 }

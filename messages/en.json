@@ -264,6 +264,7 @@
     "settings": "Settings",
     "appearance": "Appearance",
     "billing": "Billing",
+    "integrations": "Integrations",
     "theme": "Theme",
     "theme_description": "Choose between light and dark mode for your dashboard.",
     "color_scheme": "Color Scheme",

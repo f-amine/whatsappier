@@ -26,7 +26,8 @@ export enum WebhookType {
   ORDER_CONFIRMED = "order/confirmed",
   ORDER_CREATED = "order/created",
   ORDER_FULFILLED = "order/fulfilled",
-  ORDER_UPDATED = "order/updated"
+  ORDER_UPDATED = "order/updated",
+  CHECKOUT_CREATED = "checkout/created"
 }
 
 export enum OrderFinancialStatus {

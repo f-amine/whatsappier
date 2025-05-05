@@ -1,4 +1,3 @@
-// components/tables/templates/templates-table-columns.tsx
 "use client";
 
 import { Template } from "@prisma/client"

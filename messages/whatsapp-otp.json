@@ -1,0 +1,62 @@
+{
+  "en": {
+    "title": "WhatsApp Verification",
+    "message": "We have sent a verification code to your WhatsApp. Please enter it below to complete your purchase.",
+    "placeholder": "Enter verification code",
+    "verify": "Verify & Continue",
+    "cancel": "Cancel",
+    "success": "Verification successful! Processing your order...",
+    "error": "Invalid verification code. Please try again.",
+    "enterCode": "Please enter the verification code"
+  },
+  "ar": {
+    "title": "التحقق عبر واتساب",
+    "message": "لقد أرسلنا رمز التحقق إلى واتساب الخاص بك. الرجاء إدخاله أدناه لإكمال عملية الشراء.",
+    "placeholder": "أدخل رمز التحقق",
+    "verify": "تحقق ومتابعة",
+    "cancel": "إلغاء",
+    "success": "تم التحقق بنجاح! جاري معالجة طلبك...",
+    "error": "رمز التحقق غير صالح. حاول مرة أخرى.",
+    "enterCode": "الرجاء إدخال رمز التحقق"
+  },
+  "fr": {
+    "title": "Vérification WhatsApp",
+    "message": "Nous avons envoyé un code de vérification sur votre WhatsApp. Veuillez le saisir ci-dessous pour finaliser votre achat.",
+    "placeholder": "Entrez le code de vérification",
+    "verify": "Vérifier et continuer",
+    "cancel": "Annuler",
+    "success": "Vérification réussie ! Traitement de votre commande...",
+    "error": "Code de vérification invalide. Veuillez réessayer.",
+    "enterCode": "Veuillez entrer le code de vérification"
+  },
+  "es": {
+    "title": "Verificación de WhatsApp",
+    "message": "Hemos enviado un código de verificación a tu WhatsApp. Por favor ingrésalo a continuación para completar tu compra.",
+    "placeholder": "Ingresa el código de verificación",
+    "verify": "Verificar y Continuar",
+    "cancel": "Cancelar",
+    "success": "¡Verificación exitosa! Procesando tu pedido...",
+    "error": "Código de verificación inválido. Por favor intenta de nuevo.",
+    "enterCode": "Por favor ingresa el código de verificación"
+  },
+  "de": {
+    "title": "WhatsApp-Verifizierung",
+    "message": "Wir haben einen Bestätigungscode an Ihre WhatsApp gesendet. Bitte geben Sie ihn unten ein, um Ihren Kauf abzuschließen.",
+    "placeholder": "Bestätigungscode eingeben",
+    "verify": "Verifizieren & Fortfahren",
+    "cancel": "Abbrechen",
+    "success": "Verifizierung erfolgreich! Ihre Bestellung wird bearbeitet...",
+    "error": "Ungültiger Bestätigungscode. Bitte versuchen Sie es erneut.",
+    "enterCode": "Bitte geben Sie den Bestätigungscode ein"
+  },
+  "pt": {
+    "title": "Verificação do WhatsApp",
+    "message": "Enviamos um código de verificação para o seu WhatsApp. Por favor, insira-o abaixo para concluir sua compra.",
+    "placeholder": "Digite o código de verificação",
+    "verify": "Verificar e Continuar",
+    "cancel": "Cancelar",
+    "success": "Verificação bem-sucedida! Processando seu pedido...",
+    "error": "Código de verificação inválido. Por favor, tente novamente.",
+    "enterCode": "Por favor, insira o código de verificação"
+  }
+}

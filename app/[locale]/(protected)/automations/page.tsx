@@ -110,7 +110,7 @@ export default function AutomationsPage() {
                 variant="outline"
                 className="flex gap-2 items-center"
               >
-                <Plus className="w-4 w-4" />
+                <Plus className="w-4 h-4" />
                 {t('create_automation')}
               </Button>
             </Link>

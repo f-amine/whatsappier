@@ -1,4 +1,3 @@
-// File: /whatsappier/components/pages/automations/config-forms/LfOrderToWhatsappForm.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -13,10 +12,11 @@ import { SheetSelector } from '@/components/forms/sheets-selector';
 import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 import { Platform } from '@prisma/client';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Check, Database, Link2, MessageSquare, ShoppingCart, Smartphone, Table } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ORDER_SHEET_COLUMNS, convertColumnsToFormValues, getColumnDisplayName } from '@/lib/automations/helpers/sheets-columns';
 
 type FormValues = z.infer<typeof LfOrderToWhatsappConfigSchema>;
 
@@ -32,20 +32,21 @@ export const LfOrderToWhatsappForm: React.FC<LfOrderToWhatsappFormProps> = ({ fo
   // Create state for active tab
   const [activeTab, setActiveTab] = useState("connection");
   
-  // Ensure sheetColumns have default values to prevent TypeError
+  // Ensure all sheetColumns have default values
   React.useEffect(() => {
     // Initialize default column configuration if not already set
     if (!form.getValues('sheetColumns')) {
-      form.setValue('sheetColumns', [
-        { field: 'date', enabled: true },
-        { field: 'orderNumber', enabled: true },
-        { field: 'customerName', enabled: true },
-        { field: 'customerEmail', enabled: true },
-        { field: 'customerPhone', enabled: true },
-        { field: 'totalAmount', enabled: true },
-        { field: 'status', enabled: true },
-        { field: 'replyText', enabled: true }
-      ]);
+      form.setValue('sheetColumns', convertColumnsToFormValues(ORDER_SHEET_COLUMNS));
+    }
+    
+    // Set default value for createNewSheet if not already set
+    if (form.getValues('createNewSheet') === undefined) {
+      form.setValue('createNewSheet', false);
+    }
+    
+    // Set default value for customSheetName to empty string if not already set
+    if (form.getValues('createNewSheet') && !form.getValues('customSheetName')) {
+      form.setValue('customSheetName', '');
     }
   }, [form]);
   
@@ -438,35 +439,51 @@ export const LfOrderToWhatsappForm: React.FC<LfOrderToWhatsappFormProps> = ({ fo
               Choose which data fields to include in your Google Sheet
             </FormDescription>
             
-            {Array.isArray(form.watch('sheetColumns')) && form.watch('sheetColumns').map((column, index) => (
-              <FormField
-                key={column.field}
-                control={form.control}
-                name={`sheetColumns.${index}.enabled`}
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 mb-2">
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        checked={field.value}
-                        onChange={field.onChange}
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      {column.field === 'date' && 'Date'}
-                      {column.field === 'orderNumber' && 'Order Number'}
-                      {column.field === 'customerName' && 'Customer Name'}
-                      {column.field === 'customerEmail' && 'Customer Email'}
-                      {column.field === 'customerPhone' && 'Customer Phone'}
-                      {column.field === 'totalAmount' && 'Total Amount'}
-                      {column.field === 'status' && 'Order Status'}
-                      {column.field === 'replyText' && 'Customer Reply Text'}
-                    </FormLabel>
-                  </FormItem>
-                )}
-              />
-            ))}
+            {/* Group columns by category and display them */}
+            {(() => {
+              // Get all sheet columns
+              const sheetColumns = form.watch('sheetColumns') || [];
+              
+              // Get unique categories
+              const categories = [...new Set(sheetColumns.map(col => col.category))];
+              
+              return categories.map(category => (
+                <div key={category} className="mb-6">
+                  <h3 className="text-sm font-semibold mb-2 pb-1 border-b">{category}</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {sheetColumns
+                      .filter(column => column.category === category)
+                      .map((column, columnIndex) => {
+                        // Find the index in the original array
+                        const index = sheetColumns.findIndex(col => col.field === column.field);
+                        
+                        return (
+                          <FormField
+                            key={column.field}
+                            control={form.control}
+                            name={`sheetColumns.${index}.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-3 space-y-0 mb-1">
+                                <FormControl>
+                                  <input
+                                    type="checkbox"
+                                    checked={field.value}
+                                    onChange={field.onChange}
+                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal text-sm">
+                                  {getColumnDisplayName(column.field)}
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                        );
+                      })}
+                  </div>
+                </div>
+              ));
+            })()}
           </div>
           
           <div className="flex justify-start mt-6">

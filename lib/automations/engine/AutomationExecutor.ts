@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db';
 import { Automation, Prisma, Run, RunStatus } from '@prisma/client'; // Import Prisma, RunStatus
 import { getAutomationTemplateById } from '../templates/registry';
 import { executeLfOrderToWhatsapp, handleLfOrderReply } from '../execution/lf-order-to-whatsapp';
+import { executeLfAbandonedCheckoutRecovery } from '../execution/lf-abandoned-checkout-recovery';
 
 
 type ExecutionFunction = (
@@ -24,6 +25,7 @@ type ReplyHandlerFunction = (
 
 const executionLogicMap: Record<string, ExecutionFunction> = {
     'executeLfOrderToWhatsapp': executeLfOrderToWhatsapp,
+    'executeLfAbandonedCheckoutRecovery': executeLfAbandonedCheckoutRecovery,
 };
 
 const replyHandlerMap: Record<string, ReplyHandlerFunction> = {
