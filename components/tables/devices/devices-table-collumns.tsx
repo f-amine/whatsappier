@@ -18,13 +18,14 @@ import { toast } from "sonner"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
 import { DialogTitle } from "@radix-ui/react-dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { QRCodeResponse } from "@/lib/automations/helpers/whatsapp";
 
 export const useDeviceColumns = (refetch) => {
  const t = useTranslations('DevicesPage')
  const [selectedRows, setSelectedRows] = useState<DeviceWithMetadata[]>([])
  const [isDialogOpen, setIsDialogOpen] = useState(false)
  const [connectDialogOpen, setConnectDialogOpen] = useState(false)
- const [qrCodeData, setQrCodeData] = useState<{ base64: string; code: string; pairingCode: string } | null>(null)
+ const [qrCodeData, setQrCodeData] = useState<QRCodeResponse>(null)
  const [selectedDevice, setSelectedDevice] = useState<DeviceWithMetadata | null>(null)
 
  const bulkDeleteMutation = useMutation({

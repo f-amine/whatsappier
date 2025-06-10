@@ -26,27 +26,23 @@ export class GoogleSheetsService {
   private oauth2Client: OAuth2Client;
 
   constructor(accessToken: string, refreshToken?: string) {
-    // Create an OAuth2 client with the given credentials
     this.oauth2Client = new OAuth2Client(
       env.GOOGLE_CLIENT_ID,
       env.GOOGLE_CLIENT_SECRET,
       `${env.NEXT_PUBLIC_APP_URL}/api/connections/google-sheets/callback`
     );
     
-    // Set credentials
     this.oauth2Client.setCredentials({
       access_token: accessToken,
       refresh_token: refreshToken,
-      scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive'
+      scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file'
     });
     
-    // Create the sheets client
     this.sheetsClient = sheets({
       version: 'v4',
       auth: this.oauth2Client
     });
     
-    // Create the drive client for listing files
     this.driveClient = drive({
       version: 'v3',
       auth: this.oauth2Client
@@ -67,7 +63,6 @@ export class GoogleSheetsService {
   }
 
   private async refreshTokenIfNeeded(): Promise<void> {
-    // Check if token is expired or will expire soon
     const tokenInfo = this.oauth2Client.credentials;
     const now = Date.now();
     
@@ -80,7 +75,6 @@ export class GoogleSheetsService {
         
         const { credentials } = await this.oauth2Client.refreshAccessToken();
         
-        // Update the client with new credentials
         this.oauth2Client.setCredentials(credentials);
         
         console.log('Token refreshed successfully');

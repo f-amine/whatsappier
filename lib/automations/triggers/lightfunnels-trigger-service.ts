@@ -55,16 +55,15 @@ export class LightfunnelsTriggerService implements TriggerSetupService {
       const createdWebhook = await lfService.createWebhook({
         type: lfWebhookType,
         url: webhookUrl,
-        version: WebhookVersion.V2, // Use V2 for order payloads
+        version: WebhookVersion.V2,
         settings: {}
       });
       console.log(`[LightfunnelsTriggerService] Webhook created: ID=${createdWebhook.id}`);
 
-      // 5. Return the necessary info to store in triggerConfig
       return {
         externalWebhookId: createdWebhook.id,
-        webhookUrl: webhookUrl, // Store the registered URL
-        lfWebhookType: lfWebhookType // Store the type used
+        webhookUrl: webhookUrl, 
+        lfWebhookType: lfWebhookType 
       };
     } catch (error: any) {
       console.error(`[LightfunnelsTriggerService] Failed to create webhook for automation ${automationId}:`, error);

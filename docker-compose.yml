@@ -1,6 +1,6 @@
 services:
   api:
-    container_name: evolution_api
+    container_name: evolution_api_whatsappier
     image: atendai/evolution-api:latest
     restart: always
     ports:
@@ -15,7 +15,7 @@ services:
       - 8081
   postgres:
     image: 'postgres:16'
-    container_name: postgres
+    container_name: postgres_whatsappier
     restart: unless-stopped
     environment:
       - 'POSTGRES_DB=${AP_POSTGRES_DATABASE}'
@@ -31,7 +31,7 @@ services:
       - activepieces
   redis:
     image: 'redis:7.0.7'
-    container_name: redis1
+    container_name: redis_whatsappier
     restart: unless-stopped
     volumes:
       - 'redis_data:/data'

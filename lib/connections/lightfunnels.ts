@@ -14,9 +14,6 @@ const LIGHTFUNNELS_SCOPES = ['funnels', 'orders', 'products', 'analytics', 'cust
 
 export async function exchangeLightFunnelsCode(code: string, state: string) {
   try {
-    // Verify state matches to prevent CSRF attacks
-    // You should implement state verification logic here
-
     const response = await fetch('https://api.lightfunnels.com/oauth/access_token', {
       method: 'POST',
       headers: {
@@ -64,43 +61,3 @@ export async function exchangeLightFunnelsCode(code: string, state: string) {
   }
 }
 
-// Verify if the connection is still valid
-export async function verifyLightFunnelsConnection(connectionId: string) {
-  try {
-    const connection = await prisma.connection.findUnique({
-      where: { id: connectionId },
-    })
-
-    if (!connection) {
-      throw new Error('Connection not found')
-    }
-
-    const accessToken = (connection.credentials as any).accessToken
-
-    // Make a test API call to verify the token
-    const response = await fetch('https://app.lightfunnels.com/api/v2/shop', {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    })
-
-    const isValid = response.ok
-
-    // Update connection status
-    await prisma.connection.update({
-      where: { id: connectionId },
-      data: {
-        isActive: isValid,
-        metadata: {
-          ...connection.metadata,
-          lastVerified: new Date().toISOString(),
-        },
-      },
-    })
-
-    return isValid
-  } catch (error) {
-    console.error('Error verifying LightFunnels connection:', error)
-    return false
-  }
-}

@@ -1,4 +1,3 @@
-// /whatsappier/components/pages/automations/config-forms/AutomationConfigForm.tsx
 'use client';
 
 import React from 'react';
@@ -36,6 +35,22 @@ export const AutomationConfigForm: React.FC<AutomationConfigFormProps> = ({
 
   const SpecificFormComponent = template.ConfigFormComponent;
 
+  const isMultiStepForm = templateDefinitionId === 'gsheets-order-sync' || 
+                          templateDefinitionId === 'lf-order-to-whatsapp';
+
+  const shouldShowSubmitButton = !isMultiStepForm && !disableSubmit;
+
+  const formComponentProps: any = {
+    form,
+    templateDefinitionId,
+    automationId,
+  };
+
+  if (isMultiStepForm) {
+    formComponentProps.onSubmit = onSubmit;
+    formComponentProps.isSubmitting = isSubmitting;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -47,16 +62,14 @@ export const AutomationConfigForm: React.FC<AutomationConfigFormProps> = ({
           <form onSubmit={disableSubmit ? (e) => e.preventDefault() : form.handleSubmit(onSubmit)} className="space-y-6">
 
             <SpecificFormComponent
-                form={form}
-                templateDefinitionId={templateDefinitionId}
-                automationId={automationId} 
+                {...formComponentProps}
             />
 
             {form.formState.errors.root && (
                <p className="text-sm font-medium text-destructive">{form.formState.errors.root.message}</p>
             )}
 
-            {!disableSubmit && (
+            {shouldShowSubmitButton && (
               <div className="flex justify-end">
                  <Button type="submit" disabled={isSubmitting}>
                    {isSubmitting && (

@@ -13,8 +13,8 @@ export enum AppTriggerType {
 export enum AppActionType {
   SEND_WHATSAPP_MESSAGE = 'send_whatsapp_message',
   ADD_GOOGLE_SHEET_ROW = 'add_google_sheet_row',
+  SYNC_TO_GOOGLE_SHEETS = 'SYNC_TO_GOOGLE_SHEETS', 
   SEND_WHATSAPP_OTP = 'send_whatsapp_otp', 
-  // Add other actions
 }
 
 export type ConfigSchema = z.ZodObject<any, any, any>;

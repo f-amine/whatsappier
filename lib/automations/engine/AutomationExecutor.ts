@@ -3,6 +3,7 @@ import { Automation, Prisma, Run, RunStatus } from '@prisma/client'; // Import P
 import { getAutomationTemplateById } from '../templates/registry';
 import { executeLfOrderToWhatsapp, handleLfOrderReply } from '../execution/lf-order-to-whatsapp';
 import { executeLfAbandonedCheckoutRecovery } from '../execution/lf-abandoned-checkout-recovery';
+import { executeGsheetsOrderSync } from '../execution/lf-order-sheet-sync';
 
 
 type ExecutionFunction = (
@@ -26,6 +27,7 @@ type ReplyHandlerFunction = (
 const executionLogicMap: Record<string, ExecutionFunction> = {
     'executeLfOrderToWhatsapp': executeLfOrderToWhatsapp,
     'executeLfAbandonedCheckoutRecovery': executeLfAbandonedCheckoutRecovery,
+    'executeGsheetsOrderSync': executeGsheetsOrderSync, 
 };
 
 const replyHandlerMap: Record<string, ReplyHandlerFunction> = {

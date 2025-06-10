@@ -22,6 +22,25 @@ export enum WebhookVersion {
   V2 = "v2"
 }
 
+export interface ProductNode {
+  id: string;
+  _id: number;
+  title: string;
+  price?: number;
+  sku?: string;
+  created_at: string;
+}
+
+export interface ProductEdge {
+  node: ProductNode;
+  cursor: string;
+}
+
+export interface ProductsResponse {
+  edges: ProductEdge[];
+  pageInfo: PageInfo;
+}
+
 export enum WebhookType {
   ORDER_CONFIRMED = "order/confirmed",
   ORDER_CREATED = "order/created",
@@ -611,6 +630,53 @@ export class LightFunnelsService {
     });
 
     return response.data.node;
+  }
+
+  async getProducts(options: { first?: number; after?: string, query?: string } = {}): Promise<{ id: string; name: string; price?: number; sku?: string }[]> {
+    const { first = 10, after = "", query: queryFilter = "order_by:id published:true" } = options;
+
+    const query = `
+      query ProductsQuery($first: Int, $after: String, $query: String!) {
+        products(query: $query, after: $after, first: $first) {
+          edges {
+            node {
+              id
+              title 
+              price
+              sku
+            }
+            cursor
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+      }
+    `;
+
+    const response = await this.lf({
+      data: {
+        query,
+        variables: { first, after, query: queryFilter },
+      },
+    });
+
+    if (!response || !response.data || !response.data.products || !response.data.products.edges) {
+        console.error("Unexpected response structure from Lightfunnels Products API:", response);
+        throw new Error("Invalid response structure received from Lightfunnels API.");
+    }
+
+    const productsData = response.data.products as ProductsResponse;
+
+    const productsList = productsData.edges.map(edge => ({
+      id: edge.node.id,
+      name: edge.node.title,
+      price: edge.node.price,
+      sku: edge.node.sku,
+    }));
+
+    return productsList;
   }
 
   async updateOrder(id: string, data: UpdateOrderInput): Promise<Order> {

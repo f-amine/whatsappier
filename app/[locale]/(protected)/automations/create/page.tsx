@@ -1,4 +1,3 @@
-// /whatsappier/app/[locale]/(protected)/automations/create/page.tsx
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -21,16 +20,14 @@ export default function CreateAutomationPage() {
   const router = useRouter();
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // --- New State ---
   const [createdAutomationId, setCreatedAutomationId] = useState<string | null>(null);
-  // --- End New State ---
 
   const availableTemplates = useMemo(() => getAvailableAutomationTemplates(), []);
   const selectedTemplate = useMemo(() => selectedTemplateId ? getAutomationTemplateById(selectedTemplateId) : null, [selectedTemplateId]);
 
   const form = useForm<any>({
     resolver: selectedTemplate ? zodResolver(selectedTemplate.configSchema) : undefined,
-    defaultValues: {}, // Initialize empty, useEffect handles defaults
+    defaultValues: {}, 
   });
 
   useEffect(() => {
@@ -46,18 +43,17 @@ export default function CreateAutomationPage() {
     } else {
       form.reset({});
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTemplateId]); // Rerun only when the ID changes
+  }, [selectedTemplateId]); 
 
   const handleTemplateSelect = (templateId: string) => {
     if (templateId !== selectedTemplateId) {
-      setCreatedAutomationId(null); // Reset creation status if template changes
+      setCreatedAutomationId(null); 
       setSelectedTemplateId(templateId);
     }
   };
 
   const handleBack = () => {
-    setCreatedAutomationId(null); // Reset creation status
+    setCreatedAutomationId(null); 
     setSelectedTemplateId(null);
   };
 
@@ -65,14 +61,13 @@ export default function CreateAutomationPage() {
     if (!selectedTemplate) return;
 
     setIsSubmitting(true);
-    setCreatedAutomationId(null); // Reset before trying to create
+    setCreatedAutomationId(null); 
     try {
       const automationName = `${selectedTemplate.name} - ${new Date().toLocaleTimeString()}`;
       const automationData = {
         templateDefinitionId: selectedTemplate.id,
         name: automationName,
         config: data,
-        // Dynamically get IDs based on schema shape (more robust)
         connectionId: data[Object.keys(data).find(k => k.toLowerCase().includes('connectionid')) as string] || undefined,
         deviceId: data[Object.keys(data).find(k => k.toLowerCase().includes('deviceid')) as string] || undefined,
         templateId: data[Object.keys(data).find(k => k.toLowerCase().includes('templateid')) as string] || undefined,
@@ -81,17 +76,11 @@ export default function CreateAutomationPage() {
         isActive: true,
       };
 
-      console.log("Submitting Automation Data:", automationData);
 
-      // --- Modified Part ---
-      // Assuming createAutomationInstance returns the created automation object or its ID
       const result = await createAutomationInstance(automationData);
       toast.success(t('success.title'), { description: t('success.description') });
 
-      // **Instead of redirecting, set the created ID**
       setCreatedAutomationId(result.id);
-      // **Don't redirect here:** router.push('/automations');
-      // --- End Modified Part ---
 
     } catch (error: any) {
       console.error("Failed to create automation:", error);
